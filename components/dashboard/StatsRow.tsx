@@ -13,9 +13,9 @@ export function StatsRow({ stats, className }: { stats: Stat[]; className?: stri
   return (
     <div className={cn("grid grid-cols-2 gap-3", className)}>
       {stats.map((stat) => (
-        <Card key={stat.label} className="overflow-hidden px-4 py-3">
-          <p className="text-xs text-muted">{stat.label}</p>
-          <NumberTicker value={stat.value} className="mt-0.5 block text-xl font-semibold tabular-nums tracking-tight" />
+        <Card key={stat.label} className="overflow-hidden px-4 py-4">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted">{stat.label}</p>
+          <NumberTicker value={stat.value} className="mt-2 block text-[1.65rem] font-semibold tabular-nums tracking-[-0.04em]" />
         </Card>
       ))}
     </div>

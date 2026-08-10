@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getISOWeek } from "date-fns";
+import { format, getISOWeek } from "date-fns";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Label, TextAreaField } from "@/components/ui/Field";
 import { StatsRow } from "@/components/dashboard/StatsRow";
-import { addDays, dateKey, formatDurationLabel, weekDates, weekKey, weekStart } from "@/lib/dates";
+import { addDays, dateKey, formatDurationLabel, parseDateKey, weekDates, weekKey, weekStart } from "@/lib/dates";
 import { computeWeeklyStats } from "@/features/review/aggregate";
 import { cardVariants, listStagger } from "@/lib/motion";
 import { useTaskStore } from "@/stores/taskStore";
@@ -29,6 +29,9 @@ export default function ReviewPage() {
   const days = weekDates(anchor, weekStartsOn);
   const key = weekKey(anchor);
   const review = reviews.find((r) => r.id === key);
+  const currentWeekStart = weekStart(anchor, weekStartsOn);
+  const currentWeekEnd = addDays(currentWeekStart, 6);
+  const savedReviews = [...reviews].sort((a, b) => b.weekStart.localeCompare(a.weekStart));
 
   useEffect(() => {
     days.forEach((d) => ensureDate(dateKey(d), routines));
@@ -97,61 +100,120 @@ export default function ReviewPage() {
       </motion.div>
 
       <motion.div variants={cardVariants}>
-        <StatsRow stats={statCards} className="md:grid-cols-4" />
+        <Card className="space-y-3 p-5">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Where It Saves</p>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-lg font-semibold tracking-tight">
+                Week {getISOWeek(anchor)} · {format(currentWeekStart, "MMM d")} - {format(currentWeekEnd, "MMM d, yyyy")}
+              </p>
+              <p className="text-sm text-muted">
+                {review
+                  ? `Saved locally for this week on ${format(new Date(review.updatedAt), "MMM d, yyyy 'at' h:mm a")}.`
+                  : "This week's review will appear here after you save it."}
+              </p>
+            </div>
+            <span className="rounded-full border border-white/45 bg-white/55 px-3 py-1 text-sm font-medium text-muted dark:border-white/10 dark:bg-white/6">
+              {key}
+            </span>
+          </div>
+        </Card>
       </motion.div>
 
       <motion.div variants={cardVariants}>
-      <Card className="space-y-4 p-5">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div>
-            <Label htmlFor="went-well">What went well?</Label>
-            <TextAreaField
-              id="went-well"
-              rows={5}
-              value={wentWell}
-              onChange={(e) => setWentWell(e.target.value)}
-              onBlur={() => saveField("wentWell", wentWell)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="needs-improvement">What needs improvement?</Label>
-            <TextAreaField
-              id="needs-improvement"
-              rows={5}
-              value={needsImprovement}
-              onChange={(e) => setNeedsImprovement(e.target.value)}
-              onBlur={() => saveField("needsImprovement", needsImprovement)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="next-focus">Next week&rsquo;s focus</Label>
-            <TextAreaField
-              id="next-focus"
-              rows={5}
-              value={nextWeekFocus}
-              onChange={(e) => setNextWeekFocus(e.target.value)}
-              onBlur={() => saveField("nextWeekFocus", nextWeekFocus)}
-            />
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            type="button"
-            onClick={async () => {
-              await Promise.all([
-                saveField("wentWell", wentWell),
-                saveField("needsImprovement", needsImprovement),
-                saveField("nextWeekFocus", nextWeekFocus),
-              ]);
-              toast("Review saved", "success");
-            }}
-          >
-            Save review
-          </Button>
-        </div>
-      </Card>
+        <StatsRow stats={statCards} className="md:grid-cols-4" />
       </motion.div>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <motion.div variants={cardVariants}>
+          <Card className="space-y-4 p-5">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <Label htmlFor="went-well">What went well?</Label>
+                <TextAreaField
+                  id="went-well"
+                  rows={5}
+                  value={wentWell}
+                  onChange={(e) => setWentWell(e.target.value)}
+                  onBlur={() => saveField("wentWell", wentWell)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="needs-improvement">What needs improvement?</Label>
+                <TextAreaField
+                  id="needs-improvement"
+                  rows={5}
+                  value={needsImprovement}
+                  onChange={(e) => setNeedsImprovement(e.target.value)}
+                  onBlur={() => saveField("needsImprovement", needsImprovement)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="next-focus">Next week&rsquo;s focus</Label>
+                <TextAreaField
+                  id="next-focus"
+                  rows={5}
+                  value={nextWeekFocus}
+                  onChange={(e) => setNextWeekFocus(e.target.value)}
+                  onBlur={() => saveField("nextWeekFocus", nextWeekFocus)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                type="button"
+                onClick={async () => {
+                  await Promise.all([
+                    saveField("wentWell", wentWell),
+                    saveField("needsImprovement", needsImprovement),
+                    saveField("nextWeekFocus", nextWeekFocus),
+                  ]);
+                  toast("Review saved", "success");
+                }}
+              >
+                Save review
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={cardVariants}>
+          <Card className="p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Saved Weeks</p>
+            {savedReviews.length === 0 ? (
+              <p className="mt-3 text-sm text-muted">No weekly reviews saved yet.</p>
+            ) : (
+              <div className="mt-3 space-y-2">
+                {savedReviews.map((item) => {
+                  const start = parseDateKey(item.weekStart);
+                  const isActive = item.id === key;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setAnchor(start)}
+                      className={`w-full rounded-2xl border px-3 py-3 text-left transition-colors ${
+                        isActive
+                          ? "border-accent bg-accent/10"
+                          : "border-border bg-surface-2 hover:border-border-strong"
+                      }`}
+                    >
+                      <p className="text-sm font-semibold tracking-tight">{item.id}</p>
+                      <p className="mt-1 text-xs text-muted">
+                        {format(start, "MMM d")} - {format(addDays(start, 6), "MMM d, yyyy")}
+                      </p>
+                      <p className="mt-1 text-xs text-muted">
+                        Updated {format(new Date(item.updatedAt), "MMM d, yyyy")}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }

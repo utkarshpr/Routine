@@ -6,7 +6,8 @@ export function ExternalTools() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>External Tools</CardTitle>
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">Workspace</p>
+        <CardTitle className="mt-2 text-xl tracking-[-0.03em]">External Tools</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-2 sm:grid-cols-3">
         {EXTERNAL_TOOLS.map((tool) => (
@@ -15,7 +16,7 @@ export function ExternalTools() {
             href={tool.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col justify-between rounded-xl border border-border bg-surface-2 p-4 transition-colors hover:border-accent/40"
+            className="group flex flex-col justify-between rounded-[22px] border border-white/45 bg-white/42 p-4 backdrop-blur-xl transition-colors hover:border-accent/30 hover:bg-white/62 dark:border-white/10 dark:bg-white/6 dark:hover:bg-white/8"
           >
             <div>
               <p className="text-sm font-medium">{tool.name}</p>

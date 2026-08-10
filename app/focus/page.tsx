@@ -33,9 +33,17 @@ function FocusPageContent() {
   const [justCompletedId, setJustCompletedId] = useState<string | null>(null);
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
+  const viewingSpecificTask = Boolean(taskId && task);
+  const activeSessionMatchesTask = Boolean(
+    activeSession && taskId && activeSession.taskId === taskId
+  );
+  const shouldShowRequestedTaskSetup = viewingSpecificTask && !activeSessionMatchesTask;
   const completedSession = sessions.find((s) => s.id === justCompletedId) ?? null;
 
   async function handleStart(params: { title: string; category: Category; mode: FocusMode; plannedSeconds: number }) {
+    if (activeSession && shouldShowRequestedTaskSetup) {
+      await abandon(activeSession.id);
+    }
     await start({ taskId: task?.id ?? null, ...params });
   }
 
@@ -71,7 +79,7 @@ function FocusPageContent() {
     return <FocusComplete session={completedSession} onDone={() => setJustCompletedId(null)} />;
   }
 
-  if (activeSession) {
+  if (activeSession && !shouldShowRequestedTaskSetup) {
     return (
       <FocusTimer
         session={activeSession}

@@ -82,24 +82,50 @@ export default function TodayPage() {
 
   return (
     <motion.div
-      className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-8 md:py-10"
+      className="mx-auto max-w-[1480px] space-y-8 px-4 py-6 md:px-8 md:py-10"
       initial="initial"
       animate="animate"
       variants={listStagger}
     >
-      <Greeting />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.45fr)_380px]">
+        <div className="space-y-6">
+          <motion.section
+            variants={cardVariants}
+            className="relative overflow-hidden rounded-[36px] border border-white/50 bg-surface/88 px-6 py-6 shadow-[var(--shadow-card)] backdrop-blur-2xl dark:border-white/10 md:px-8 md:py-8"
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent)_18%,white),transparent_68%)] blur-3xl"
+            />
+            <div className="relative z-10 flex flex-col gap-6">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="space-y-5">
+                  <Greeting />
+                  <div className="max-w-2xl">
+                    <p className="text-sm leading-7 text-muted md:text-[15px]">
+                      A quieter, more focused view of your day. Track what matters, move with intention, and keep the schedule feeling calm.
+                    </p>
+                  </div>
+                </div>
+                <motion.div variants={cardVariants} className="self-start">
+                  <QuickActionsRow hasConflicts={conflicts.length > 0} onResolveConflicts={handleResolveConflicts} />
+                </motion.div>
+              </div>
 
-      <motion.div variants={cardVariants}>
-        <QuickActionsRow hasConflicts={conflicts.length > 0} onResolveConflicts={handleResolveConflicts} />
-      </motion.div>
+              <StatsRow stats={stats} className="md:grid-cols-4" />
+            </div>
+          </motion.section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
           <CurrentTaskCard current={dayStatus.current} next={dayStatus.next} />
+
           <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Today&rsquo;s Timeline</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">Agenda</p>
+                  <CardTitle className="mt-2 text-2xl tracking-[-0.04em]">Today&rsquo;s Timeline</CardTitle>
+                </div>
+                <p className="text-sm text-muted">{todayTasks.length} scheduled blocks</p>
               </CardHeader>
               <CardContent>
                 <Timeline tasks={todayTasks} dayStatus={dayStatus} />
@@ -108,7 +134,7 @@ export default function TodayPage() {
           </motion.div>
         </div>
 
-        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <div className="space-y-6 xl:sticky xl:top-8 xl:self-start">
           <motion.div variants={cardVariants}>
             <ProgressSection
               progressPct={dayStatus.progressPct}
@@ -120,14 +146,10 @@ export default function TodayPage() {
             <NextUpList tasks={nextUp} />
           </motion.div>
           <motion.div variants={cardVariants}>
-            <StatsRow stats={stats} />
+            <ExternalTools />
           </motion.div>
         </div>
       </div>
-
-      <motion.div variants={cardVariants}>
-        <ExternalTools />
-      </motion.div>
     </motion.div>
   );
 }

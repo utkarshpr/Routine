@@ -18,8 +18,9 @@ import { useReviewStore } from "@/stores/reviewStore";
 import { useTaskStore } from "@/stores/taskStore";
 import { toast } from "@/stores/toastStore";
 import { defaultIconColor, endTimeFor, parseQuickAdd } from "@/lib/nlp";
-import { minutesToTime, parseDateKey, todayKey } from "@/lib/dates";
-import { CATEGORIES, type Category } from "@/types";
+import { dayOfWeek, minutesToTime, parseDateKey, todayKey } from "@/lib/dates";
+import { DAY_LABELS } from "@/lib/constants";
+import { CATEGORIES, type Category, type DayOfWeek } from "@/types";
 
 interface SearchResult {
   id: string;
@@ -27,6 +28,8 @@ interface SearchResult {
   meta: string;
   onSelect: () => void;
 }
+
+const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6];
 
 function roundedNow(): string {
   const now = new Date();
@@ -54,10 +57,14 @@ export function CommandPalette({
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const routines = useRoutineStore((s) => s.routines);
+  const addRoutine = useRoutineStore((s) => s.add);
   const habits = useHabitStore((s) => s.habits);
   const goals = useGoalStore((s) => s.goals);
   const reviews = useReviewStore((s) => s.reviews);
   const addManualTask = useTaskStore((s) => s.addManualTask);
+  const [taskScope, setTaskScope] = useState<"single" | "recurring">("single");
+  const [repeatMode, setRepeatMode] = useState<"weekday" | "everyday" | "custom">("weekday");
+  const [repeatDays, setRepeatDays] = useState<DayOfWeek[]>([dayOfWeek(targetDate)]);
 
   // Reset local state whenever the palette transitions from closed to open,
   // using React's render-time "adjusting state" pattern instead of an effect.
@@ -67,21 +74,34 @@ export function CommandPalette({
     if (open) {
       setQuery("");
       setManualMode(initialMode);
+      setTaskScope("single");
+      setRepeatMode("weekday");
+      setRepeatDays([dayOfWeek(targetDate)]);
     }
   }
 
   const mode = query.trim().startsWith("+") ? "add" : manualMode;
 
-  function switchMode(next: "search" | "add") {
-    setQuery("");
-    setManualMode(next);
-  }
-
-  const parsed = useMemo(() => parseQuickAdd(query || "+ New task", roundedNow()), [query]);
   const [formTitle, setFormTitle] = useState("");
   const [formCategory, setFormCategory] = useState<Category>("Other");
   const [formStart, setFormStart] = useState("");
   const [formDuration, setFormDuration] = useState(30);
+
+  function switchMode(next: "search" | "add") {
+    setQuery("");
+    setManualMode(next);
+    setTaskScope("single");
+    setRepeatMode("weekday");
+    setRepeatDays([dayOfWeek(targetDate)]);
+  }
+
+  const parsed = useMemo(() => parseQuickAdd(query || "+ New task", roundedNow()), [query]);
+
+  function toggleRepeatDay(day: DayOfWeek) {
+    setRepeatDays((current) =>
+      current.includes(day) ? current.filter((value) => value !== day) : [...current, day].sort((a, b) => a - b)
+    );
+  }
 
   // Re-sync the editable preview fields from the live parse every time the
   // query text changes while in add mode, so typing "+ Gym 6 PM" actually
@@ -165,21 +185,62 @@ export function CommandPalette({
       durationMinutes: formDuration,
       confidence: "high",
     });
-    await addManualTask({
-      routineId: null,
-      date: targetDate,
-      title: formTitle.trim() || "Untitled task",
-      category: formCategory,
-      startTime: formStart,
-      endTime: end,
-      priority: "medium",
-      icon: meta.icon,
-      color: meta.color,
-      type: "FLEXIBLE",
-      status: "pending",
-      completionRequired: true,
-    });
-    toast(`Added to ${targetDateLabel}`, "success");
+    const title = formTitle.trim() || "Untitled task";
+
+    if (taskScope === "recurring") {
+      const weekday = parseDateKey(targetDate);
+      const daysOfWeek =
+        repeatMode === "everyday"
+          ? ALL_DAYS
+          : repeatMode === "custom"
+            ? repeatDays
+            : [dayOfWeek(targetDate)];
+
+      if (daysOfWeek.length === 0) {
+        toast("Choose at least one day for the recurring routine", "error");
+        return;
+      }
+
+      await addRoutine({
+        title,
+        category: formCategory,
+        startTime: formStart,
+        endTime: end,
+        daysOfWeek,
+        priority: "medium",
+        icon: meta.icon,
+        color: meta.color,
+        recurring: true,
+        reminder: { enabled: true, offsetMinutes: 10, sound: true },
+        completionRequired: true,
+        type: "FLEXIBLE",
+        paused: false,
+      });
+      const repeatLabel =
+        repeatMode === "everyday"
+          ? "Recurring every day"
+          : repeatMode === "custom"
+            ? `Recurring on ${daysOfWeek.map((day) => DAY_LABELS[day]).join(", ")}`
+            : `Recurring every ${format(weekday, "EEEE")}`;
+      toast(repeatLabel, "success");
+      router.push("/schedule?tab=routines");
+    } else {
+      await addManualTask({
+        routineId: null,
+        date: targetDate,
+        title,
+        category: formCategory,
+        startTime: formStart,
+        endTime: end,
+        priority: "medium",
+        icon: meta.icon,
+        color: meta.color,
+        type: "FLEXIBLE",
+        status: "pending",
+        completionRequired: true,
+      });
+      toast(`Added to ${targetDateLabel}`, "success");
+    }
     onClose();
   }
 
@@ -243,6 +304,106 @@ export function CommandPalette({
           <p className="text-xs text-muted">
             We parsed this as best we could — check the details before adding.
           </p>
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">Repeat behavior</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setTaskScope("single")}
+                className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium ${
+                  taskScope === "single"
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-surface-2 text-muted"
+                }`}
+              >
+                Just this day
+              </button>
+              <button
+                type="button"
+                onClick={() => setTaskScope("recurring")}
+                className={`flex-1 rounded-xl border px-3 py-2 text-sm font-medium ${
+                  taskScope === "recurring"
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-surface-2 text-muted"
+                }`}
+              >
+                Recurring
+              </button>
+            </div>
+            <p className="text-xs text-muted">
+              {taskScope === "recurring"
+                ? repeatMode === "everyday"
+                  ? "This will repeat every day and show across future schedule days."
+                  : repeatMode === "custom"
+                    ? `This will repeat on ${repeatDays.length > 0 ? repeatDays.map((day) => DAY_LABELS[day]).join(", ") : "the selected days"} and show in future schedule days too.`
+                    : `This will repeat every ${format(parseDateKey(targetDate), "EEEE")} and show in future schedule days too.`
+                : `This will only be added on ${targetDateLabel}.`}
+            </p>
+            {taskScope === "recurring" && (
+              <div className="space-y-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRepeatMode("weekday");
+                      setRepeatDays([dayOfWeek(targetDate)]);
+                    }}
+                    className={`rounded-xl border px-3 py-2 text-sm font-medium ${
+                      repeatMode === "weekday"
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-border bg-surface-2 text-muted"
+                    }`}
+                  >
+                    Same weekday
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRepeatMode("everyday");
+                      setRepeatDays(ALL_DAYS);
+                    }}
+                    className={`rounded-xl border px-3 py-2 text-sm font-medium ${
+                      repeatMode === "everyday"
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-border bg-surface-2 text-muted"
+                    }`}
+                  >
+                    Every day
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRepeatMode("custom");
+                      setRepeatDays((current) => (current.length > 0 ? current : [dayOfWeek(targetDate)]));
+                    }}
+                    className={`rounded-xl border px-3 py-2 text-sm font-medium ${
+                      repeatMode === "custom"
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-border bg-surface-2 text-muted"
+                    }`}
+                  >
+                    Choose days
+                  </button>
+                </div>
+                {repeatMode === "custom" && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {ALL_DAYS.map((day) => (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => toggleRepeatDay(day)}
+                        className={`h-9 w-9 rounded-full text-xs font-medium ${
+                          repeatDays.includes(day) ? "bg-accent text-accent-foreground" : "bg-surface-2 text-muted"
+                        }`}
+                      >
+                        {DAY_LABELS[day][0]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <TextField
@@ -284,7 +445,7 @@ export function CommandPalette({
               Cancel
             </Button>
             <Button onClick={handleAdd} type="button">
-              Add to {targetDateLabel}
+              {taskScope === "recurring" ? "Create recurring routine" : `Add to ${targetDateLabel}`}
             </Button>
           </div>
         </div>
