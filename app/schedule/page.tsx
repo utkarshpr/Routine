@@ -15,6 +15,7 @@ export default function SchedulePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeTabFromUrl = searchParams.get("tab") === "routines" ? "Routines" : "Week";
+  const focusedDate = searchParams.get("date") ?? undefined;
   const initialTab = activeTabFromUrl;
   const [tab, setTab] = useState<(typeof TABS)[number]>(initialTab);
 
@@ -37,7 +38,7 @@ export default function SchedulePage() {
 
       <AnimatePresence mode="wait">
         <motion.div key={tab} initial="initial" animate="animate" exit="exit" variants={fadeIn}>
-          {tab === "Week" ? <WeeklyPlanner /> : <RoutineManager />}
+          {tab === "Week" ? <WeeklyPlanner initialDate={focusedDate} /> : <RoutineManager />}
         </motion.div>
       </AnimatePresence>
     </div>

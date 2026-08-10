@@ -17,6 +17,8 @@ export function Toaster() {
           success: "border-success/30",
           error: "border-danger/30",
           title: "text-sm",
+          actionButton:
+            "inline-flex items-center rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-elevated",
         },
       }}
     />

@@ -27,8 +27,8 @@ const TAB_BY_VIEW_MODE: Record<ScheduleViewMode, (typeof VIEW_MODE_TABS)[number]
   week: "Week",
 };
 
-export function WeeklyPlanner() {
-  const [anchor, setAnchor] = useState(() => new Date());
+export function WeeklyPlanner({ initialDate }: { initialDate?: string }) {
+  const [anchor, setAnchor] = useState(() => (initialDate ? new Date(initialDate) : new Date()));
   const [direction, setDirection] = useState(0);
   const [viewMode, setViewMode] = useState<ScheduleViewMode>("day");
   const weekStartsOn = useSettingsStore((s) => s.settings.weekStartsOn);
@@ -42,6 +42,11 @@ export function WeeklyPlanner() {
   const dayLabels = days.map((d) => format(d, "EEE"));
   const [mobileDay, setMobileDay] = useState(() => format(new Date(), "EEE"));
   const selectedDay = days[dayLabels.indexOf(mobileDay)] ?? days[0];
+
+  useEffect(() => {
+    if (!initialDate) return;
+    setAnchor(new Date(initialDate));
+  }, [initialDate]);
 
   useEffect(() => {
     days.forEach((d) => ensureDate(dateKey(d), routines));

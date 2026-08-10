@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Eye, Trash2 } from "lucide-react";
 import { format, getISOWeek } from "date-fns";
@@ -19,6 +20,8 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { toast } from "@/stores/toastStore";
 
 export default function ReviewPage() {
+  const searchParams = useSearchParams();
+  const initialWeek = searchParams.get("week");
   const [anchor, setAnchor] = useState(() => new Date());
   const weekStartsOn = useSettingsStore((s) => s.settings.weekStartsOn);
   const tasks = useTaskStore((s) => s.tasks);
@@ -34,6 +37,12 @@ export default function ReviewPage() {
   const currentWeekStart = weekStart(anchor, weekStartsOn);
   const currentWeekEnd = addDays(currentWeekStart, 6);
   const savedReviews = [...reviews].sort((a, b) => b.weekStart.localeCompare(a.weekStart));
+
+  useEffect(() => {
+    if (!initialWeek) return;
+    const target = reviews.find((item) => item.id === initialWeek);
+    if (target) setAnchor(parseDateKey(target.weekStart));
+  }, [initialWeek, reviews]);
 
   useEffect(() => {
     days.forEach((d) => ensureDate(dateKey(d), routines));

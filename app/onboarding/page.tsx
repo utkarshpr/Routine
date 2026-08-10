@@ -11,14 +11,14 @@ import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { AnimatedGradientText } from "@/components/ui/effects/AnimatedGradientText";
 import { BackgroundGlow } from "@/components/ui/BackgroundGlow";
 import { durationMinutes, formatDurationLabel, formatTimeLabel } from "@/lib/dates";
-import { CATEGORY_META } from "@/lib/constants";
+import { ACCENT_COLORS, CATEGORY_META } from "@/lib/constants";
 import { buildAdaptedRoutineBlueprint, buildRoutinesFromBlueprint, defaultSeedRoutines, type OnboardingGoal } from "@/lib/seed";
 import { useRoutineStore } from "@/stores/routineStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { pageVariants } from "@/lib/motion";
 import { copy } from "@/lib/copy";
 import { cn } from "@/lib/cn";
-import type { Category, Routine } from "@/types";
+import type { AppearanceMode, Category, Routine } from "@/types";
 
 type Step = "intro" | "times" | "goals" | "preview";
 
@@ -61,9 +61,13 @@ export default function OnboardingPage() {
   const routines = useRoutineStore((s) => s.routines);
   const removeRoutine = useRoutineStore((s) => s.remove);
   const seedRoutines = useRoutineStore((s) => s.seed);
+  const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.update);
 
   const [step, setStep] = useState<Step>("intro");
+  const [name, setName] = useState(settings.userName);
+  const [appearance, setAppearance] = useState<AppearanceMode>(settings.appearance);
+  const [accentColor, setAccentColor] = useState(settings.accentColor);
   const [wakeTime, setWakeTime] = useState("06:00");
   const [workStart, setWorkStart] = useState("10:00");
   const [workEnd, setWorkEnd] = useState("18:00");
@@ -89,7 +93,10 @@ export default function OnboardingPage() {
     await Promise.all(routines.map((r) => removeRoutine(r.id)));
     await seedRoutines(nextRoutines);
     await updateSettings({
+      userName: name.trim(),
       hasOnboarded: true,
+      appearance,
+      accentColor,
       startOfDay: wakeTime,
       defaultWorkStart: workStart,
       defaultWorkEnd: workEnd,
@@ -122,6 +129,53 @@ export default function OnboardingPage() {
                   <AnimatedGradientText>{copy.tagline}</AnimatedGradientText>
                 </h1>
                 <p className="mt-3 text-base text-muted">{copy.subtitle}</p>
+                <div className="mt-8 space-y-5 text-left">
+                  <div>
+                    <Label htmlFor="onboarding-name">Your name</Label>
+                    <TextField
+                      id="onboarding-name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-1.5 block text-xs font-medium text-muted">Theme</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(["system", "light", "dark"] as AppearanceMode[]).map((mode) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setAppearance(mode)}
+                          className={cn(
+                            "rounded-full border px-3 py-2 text-sm font-medium transition-colors",
+                            appearance === mode ? "border-accent bg-accent/10 text-accent" : "border-border bg-surface-2 text-muted"
+                          )}
+                        >
+                          {mode[0].toUpperCase() + mode.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="mb-1.5 block text-xs font-medium text-muted">Accent</p>
+                    <div className="flex flex-wrap gap-2">
+                      {ACCENT_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setAccentColor(color)}
+                          aria-label={color}
+                          className={cn(
+                            "h-7 w-7 rounded-full border-2 transition-transform hover:scale-105",
+                            accentColor === color ? "border-foreground" : "border-transparent"
+                          )}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
                 <Button size="lg" className="mt-8" onClick={() => setStep("times")} type="button">
                   Build My Routine
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />

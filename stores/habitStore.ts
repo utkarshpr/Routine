@@ -13,6 +13,7 @@ interface HabitState {
   update: (id: string, partial: Partial<Habit>) => Promise<void>;
   remove: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;
+  restoreSnapshot: (snapshot: { habits: Habit[]; completions: HabitCompletion[] }) => Promise<void>;
   toggleCompletion: (habitId: string, date: string) => Promise<void>;
 }
 
@@ -73,6 +74,17 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     ]);
 
     set({ habits: [], completions: [] });
+  },
+  restoreSnapshot: async (snapshot) => {
+    await Promise.all([
+      ...snapshot.habits.map((habit) => db.put("habits", habit)),
+      ...snapshot.completions.map((completion) => db.put("habitCompletions", completion)),
+    ]);
+
+    set({
+      habits: snapshot.habits,
+      completions: snapshot.completions,
+    });
   },
   toggleCompletion: async (habitId, date) => {
     const existing = get().completions.find((c) => c.habitId === habitId && c.date === date);

@@ -18,7 +18,7 @@ import { useReviewStore } from "@/stores/reviewStore";
 import { useTaskStore } from "@/stores/taskStore";
 import { toast } from "@/stores/toastStore";
 import { defaultIconColor, endTimeFor, parseQuickAdd } from "@/lib/nlp";
-import { dayOfWeek, minutesToTime, parseDateKey, todayKey } from "@/lib/dates";
+import { dayOfWeek, formatTimeLabel, minutesToTime, parseDateKey, todayKey } from "@/lib/dates";
 import { DAY_LABELS } from "@/lib/constants";
 import { CATEGORIES, type Category, type DayOfWeek } from "@/types";
 
@@ -61,6 +61,7 @@ export function CommandPalette({
   const habits = useHabitStore((s) => s.habits);
   const goals = useGoalStore((s) => s.goals);
   const reviews = useReviewStore((s) => s.reviews);
+  const tasks = useTaskStore((s) => s.tasks);
   const addManualTask = useTaskStore((s) => s.addManualTask);
   const [taskScope, setTaskScope] = useState<"single" | "recurring">("single");
   const [repeatMode, setRepeatMode] = useState<"weekday" | "everyday" | "custom">("weekday");
@@ -120,6 +121,23 @@ export function CommandPalette({
     if (!q || mode === "add") return [];
     const items: SearchResult[] = [];
 
+    tasks
+      .filter(
+        (task) =>
+          task.title.toLowerCase().includes(q) ||
+          task.category.toLowerCase().includes(q) ||
+          task.date.includes(q)
+      )
+      .slice(0, 8)
+      .forEach((task) =>
+        items.push({
+          id: `task-${task.id}`,
+          label: task.title,
+          meta: `${task.date === todayKey() ? "Today" : task.date} · ${formatTimeLabel(task.startTime)}`,
+          onSelect: () => router.push(task.date === todayKey() ? "/today" : `/schedule?date=${task.date}`),
+        })
+      );
+
     routines
       .filter((r) => r.title.toLowerCase().includes(q))
       .slice(0, 5)
@@ -169,12 +187,12 @@ export function CommandPalette({
           id: `review-${r.id}`,
           label: `Week ${r.id}`,
           meta: "Weekly review note",
-          onSelect: () => router.push("/review"),
+          onSelect: () => router.push(`/review?week=${r.id}`),
         })
       );
 
     return items;
-  }, [query, mode, routines, habits, goals, reviews, router]);
+  }, [query, mode, tasks, routines, habits, goals, reviews, router]);
 
   async function handleAdd() {
     const meta = defaultIconColor(formCategory);
