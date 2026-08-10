@@ -91,24 +91,37 @@ export default function TodayPage() {
         <div className="space-y-6">
           <motion.section
             variants={cardVariants}
-            className="relative overflow-hidden rounded-[36px] border border-white/50 bg-surface/88 px-6 py-6 shadow-[var(--shadow-card)] backdrop-blur-2xl dark:border-white/10 md:px-8 md:py-8"
+            className="overflow-hidden rounded-[36px] border border-border bg-surface px-6 py-6 shadow-[var(--shadow-card)] md:px-8 md:py-8"
           >
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(circle,color-mix(in_srgb,var(--accent)_18%,white),transparent_68%)] blur-3xl"
-            />
-            <div className="relative z-10 flex flex-col gap-6">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div className="space-y-5">
-                  <Greeting />
-                  <div className="max-w-2xl">
-                    <p className="text-sm leading-7 text-muted md:text-[15px]">
+            <div className="flex flex-col gap-8">
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+                <div className="space-y-6">
+                  <div className="max-w-3xl space-y-5">
+                    <Greeting />
+                    <p className="max-w-2xl text-base leading-8 text-muted md:text-[17px]">
                       A quieter, more focused view of your day. Track what matters, move with intention, and keep the schedule feeling calm.
                     </p>
                   </div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3 py-1.5">
+                      <span className="h-2 w-2 rounded-full bg-foreground/70" aria-hidden="true" />
+                      {todayTasks.length} blocks today
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3 py-1.5">
+                      {dayStatus.completedCount} completed
+                    </span>
+                    {dayStatus.current && (
+                      <span className="inline-flex items-center gap-2 rounded-full border border-border bg-elevated px-3 py-1.5">
+                        Live now: {dayStatus.current.title}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <motion.div variants={cardVariants} className="self-start">
-                  <QuickActionsRow hasConflicts={conflicts.length > 0} onResolveConflicts={handleResolveConflicts} />
+
+                <motion.div variants={cardVariants} className="lg:justify-self-end">
+                  <div className="rounded-[28px] border border-border bg-elevated p-3">
+                    <QuickActionsRow hasConflicts={conflicts.length > 0} onResolveConflicts={handleResolveConflicts} />
+                  </div>
                 </motion.div>
               </div>
 

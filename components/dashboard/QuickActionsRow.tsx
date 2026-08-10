@@ -16,7 +16,7 @@ export function QuickActionsRow({
   const openCommandPalette = useUIStore((s) => s.openCommandPalette);
 
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <div className="flex flex-wrap gap-2.5 lg:justify-end">
       <Button variant="secondary" size="sm" onClick={() => openCommandPalette("add")} type="button">
         <Plus className="h-4 w-4" aria-hidden="true" />
         Quick add
