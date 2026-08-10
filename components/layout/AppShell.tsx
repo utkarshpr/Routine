@@ -50,6 +50,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [ready, hasOnboarded, pathname, router]);
 
+  useEffect(() => {
+    if (!ready || pathname === "/onboarding") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [ready, pathname]);
+
   const isOnboarding = pathname === "/onboarding";
   const needsOnboardingRedirect = ready && !hasOnboarded && !isOnboarding;
 

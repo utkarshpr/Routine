@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { db } from "@/lib/db";
 import { createId } from "@/lib/id";
+import { dayOfWeek } from "@/lib/dates";
 import { autoResolveConflicts, materializeTasksForDate, rescheduleTask } from "@/lib/scheduler";
 import type { Routine, Task } from "@/types";
 
@@ -16,6 +17,8 @@ interface TaskState {
   skipTask: (id: string) => Promise<void>;
   removeTask: (id: string) => Promise<void>;
   removeFutureByRoutineId: (routineId: string, fromDate: string) => Promise<void>;
+  removeFutureByRoutineIds: (routineIds: string[], fromDate: string) => Promise<void>;
+  syncFutureWithRoutine: (routine: Routine, fromDate: string) => Promise<void>;
   moveTask: (id: string, newStartTime: string) => Promise<void>;
   moveTaskToDate: (id: string, newDate: string, newStartTime?: string) => Promise<void>;
   autoResolveDay: (date: string) => Promise<void>;
@@ -92,6 +95,62 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     await Promise.all(toRemove.map((t) => db.remove("tasks", t.id)));
     const removedIds = new Set(toRemove.map((t) => t.id));
     set((state) => ({ tasks: state.tasks.filter((t) => !removedIds.has(t.id)) }));
+  },
+  removeFutureByRoutineIds: async (routineIds, fromDate) => {
+    if (routineIds.length === 0) return;
+    const routineIdSet = new Set(routineIds);
+    const toRemove = get().tasks.filter(
+      (task) =>
+        task.routineId !== null &&
+        routineIdSet.has(task.routineId) &&
+        task.date >= fromDate &&
+        task.status === "pending"
+    );
+    await Promise.all(toRemove.map((task) => db.remove("tasks", task.id)));
+    const removedIds = new Set(toRemove.map((task) => task.id));
+    set((state) => ({ tasks: state.tasks.filter((task) => !removedIds.has(task.id)) }));
+  },
+  syncFutureWithRoutine: async (routine, fromDate) => {
+    const affected = get().tasks.filter(
+      (task) => task.routineId === routine.id && task.date >= fromDate && task.status === "pending"
+    );
+    if (affected.length === 0) return;
+
+    const now = new Date().toISOString();
+    const toRemove = affected.filter((task) => {
+      if (routine.paused) return true;
+      if (routine.recurring) return !routine.daysOfWeek.includes(dayOfWeek(task.date));
+      return false;
+    });
+    const toUpdate = affected
+      .filter((task) => !toRemove.some((removed) => removed.id === task.id))
+      .map((task) => ({
+        ...task,
+        title: routine.title,
+        category: routine.category,
+        startTime: routine.startTime,
+        endTime: routine.endTime,
+        priority: routine.priority,
+        icon: routine.icon,
+        color: routine.color,
+        notes: routine.notes,
+        type: routine.type,
+        completionRequired: routine.completionRequired,
+        updatedAt: now,
+      }));
+
+    await Promise.all([
+      ...toRemove.map((task) => db.remove("tasks", task.id)),
+      ...toUpdate.map((task) => db.put("tasks", task)),
+    ]);
+
+    const removedIds = new Set(toRemove.map((task) => task.id));
+    const updatedById = new Map(toUpdate.map((task) => [task.id, task]));
+    set((state) => ({
+      tasks: state.tasks
+        .filter((task) => !removedIds.has(task.id))
+        .map((task) => updatedById.get(task.id) ?? task),
+    }));
   },
   moveTask: async (id, newStartTime) => {
     const task = get().tasks.find((t) => t.id === id);

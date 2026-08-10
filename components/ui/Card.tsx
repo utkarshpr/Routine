@@ -27,19 +27,23 @@ export function Card({
       ref={ref}
       onMouseMove={spotlight ? handleMouseMove : onMouseMove}
       className={cn(
-        "rounded-2xl bg-surface border border-border shadow-[var(--shadow-card)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]",
+        "rounded-[28px] border border-white/45 bg-surface/90 backdrop-blur-2xl shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color,background-color] duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:shadow-[var(--shadow-card-hover)] dark:border-white/10 dark:hover:border-white/16",
         spotlight && "group relative overflow-hidden",
         className
       )}
       {...props}
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/75 to-transparent dark:via-white/18"
+      />
       {spotlight && (
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              "radial-gradient(240px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%)",
+              "radial-gradient(260px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%)",
           }}
         />
       )}

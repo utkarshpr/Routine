@@ -3,37 +3,51 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f6f6f7;
-  --surface: #ffffff;
-  --surface-2: #eeeef0;
-  --border: #d9d9de;
-  --border-strong: #c7c7cf;
-  --foreground: #18181b;
-  --muted: #6b6b75;
-  --accent: #2563eb;
+  --font-geist-sans:
+    "SF Pro Display",
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  --font-geist-mono:
+    "SF Mono",
+    "Roboto Mono",
+    "Menlo",
+    "Monaco",
+    "Courier New",
+    monospace;
+  --background: #f4f4f1;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-2: rgba(255, 255, 255, 0.56);
+  --border: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.14);
+  --foreground: #111214;
+  --muted: #6c7078;
+  --accent: #0f62fe;
   --accent-foreground: #ffffff;
   --danger: #ef4444;
   --success: #10b981;
-  --shadow-card: 0 1px 1px rgba(20, 20, 30, 0.04), 0 6px 16px -8px rgba(20, 20, 30, 0.08), 0 16px 40px -20px rgba(20, 20, 30, 0.1);
-  --shadow-card-hover: 0 2px 4px rgba(20, 20, 30, 0.05), 0 10px 24px -8px rgba(20, 20, 30, 0.12), 0 24px 48px -20px rgba(20, 20, 30, 0.14);
-  --shadow-pop: 0 12px 32px -8px rgba(20, 20, 30, 0.22), 0 4px 12px -4px rgba(20, 20, 30, 0.12);
+  --shadow-card: 0 10px 30px -18px rgba(15, 23, 42, 0.16), 0 2px 12px -8px rgba(15, 23, 42, 0.08);
+  --shadow-card-hover: 0 18px 40px -20px rgba(15, 23, 42, 0.18), 0 10px 24px -18px rgba(15, 23, 42, 0.14);
+  --shadow-pop: 0 24px 48px -26px rgba(15, 23, 42, 0.28), 0 12px 24px -20px rgba(15, 23, 42, 0.16);
 }
 
 .dark {
-  --background: #0a0a0c;
-  --surface: #18181b;
-  --surface-2: #212126;
-  --border: #34343c;
-  --border-strong: #46464f;
-  --foreground: #f4f4f5;
-  --muted: #9c9ca8;
-  --accent: #3b82f6;
+  --background: #0b0d10;
+  --surface: rgba(23, 25, 30, 0.76);
+  --surface-2: rgba(33, 36, 43, 0.58);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --foreground: #f3f5f7;
+  --muted: #9ca3af;
+  --accent: #5c8dff;
   --accent-foreground: #ffffff;
   --danger: #f87171;
   --success: #34d399;
-  --shadow-card: 0 1px 1px rgba(0, 0, 0, 0.3), 0 6px 16px -8px rgba(0, 0, 0, 0.5), 0 16px 40px -20px rgba(0, 0, 0, 0.6);
-  --shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 24px -8px rgba(0, 0, 0, 0.55), 0 24px 48px -20px rgba(0, 0, 0, 0.65);
-  --shadow-pop: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 18px 38px -24px rgba(0, 0, 0, 0.78), 0 8px 18px -16px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 24px 56px -24px rgba(0, 0, 0, 0.82), 0 16px 32px -24px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 30px 60px -30px rgba(0, 0, 0, 0.82), 0 12px 28px -22px rgba(0, 0, 0, 0.58);
 }
 
 @theme inline {
@@ -70,10 +84,35 @@ body {
   background: var(--background);
   color: var(--foreground);
   background-image:
-    radial-gradient(680px circle at 8% -8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
-    radial-gradient(560px circle at 100% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 55%);
+    radial-gradient(720px circle at 2% -8%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    radial-gradient(520px circle at 100% 8%, rgba(255, 255, 255, 0.6), transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--background) 88%, white) 0%, var(--background) 46%, color-mix(in srgb, var(--background) 94%, black) 100%);
   background-repeat: no-repeat;
   background-attachment: fixed;
+  font-feature-settings: "ss01" 1, "cv03" 1, "cv04" 1;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.32), transparent 24%),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 42%);
+  mix-blend-mode: screen;
+  opacity: 0.45;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(circle at center, black 18%, transparent 82%);
+  opacity: 0.2;
 }
 
 ::selection {

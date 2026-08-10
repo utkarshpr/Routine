@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { db } from "@/lib/db";
+import { todayKey } from "@/lib/dates";
 import { createId } from "@/lib/id";
+import { useTaskStore } from "@/stores/taskStore";
 import type { Routine } from "@/types";
 
 interface RoutineState {
@@ -11,6 +13,7 @@ interface RoutineState {
   add: (routine: Omit<Routine, "id" | "createdAt" | "updatedAt" | "order">) => Promise<Routine>;
   update: (id: string, partial: Partial<Routine>) => Promise<void>;
   remove: (id: string) => Promise<void>;
+  clearAll: () => Promise<void>;
   duplicate: (id: string) => Promise<void>;
   togglePause: (id: string) => Promise<void>;
   reorder: (orderedIds: string[]) => Promise<void>;
@@ -46,10 +49,17 @@ export const useRoutineStore = create<RoutineState>((set, get) => ({
     const updated = { ...existing, ...partial, updatedAt: new Date().toISOString() };
     await db.put("routines", updated);
     set((state) => ({ routines: state.routines.map((r) => (r.id === id ? updated : r)) }));
+    await useTaskStore.getState().syncFutureWithRoutine(updated, todayKey());
   },
   remove: async (id) => {
     await db.remove("routines", id);
     set((state) => ({ routines: state.routines.filter((r) => r.id !== id) }));
+  },
+  clearAll: async () => {
+    const ids = get().routines.map((routine) => routine.id);
+    await Promise.all(ids.map((id) => db.remove("routines", id)));
+    set({ routines: [] });
+    await useTaskStore.getState().removeFutureByRoutineIds(ids, todayKey());
   },
   duplicate: async (id) => {
     const existing = get().routines.find((r) => r.id === id);

@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -24,6 +24,7 @@ import type { Routine } from "@/types";
 
 export function RoutineManager() {
   const routines = useRoutineStore((s) => s.routines);
+  const clearAll = useRoutineStore((s) => s.clearAll);
   const reorder = useRoutineStore((s) => s.reorder);
   const duplicate = useRoutineStore((s) => s.duplicate);
   const togglePause = useRoutineStore((s) => s.togglePause);
@@ -33,6 +34,7 @@ export function RoutineManager() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Routine | undefined>(undefined);
   const [deleteTarget, setDeleteTarget] = useState<Routine | null>(null);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
   const sorted = [...routines].sort((a, b) => a.order - b.order);
@@ -53,17 +55,25 @@ export function RoutineManager() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight">Routines</h2>
-        <Button
-          size="sm"
-          onClick={() => {
-            setEditing(undefined);
-            setFormOpen(true);
-          }}
-          type="button"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          New routine
-        </Button>
+        <div className="flex items-center gap-2">
+          {sorted.length > 0 && (
+            <Button variant="danger" size="sm" onClick={() => setClearAllOpen(true)} type="button">
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Clear all
+            </Button>
+          )}
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditing(undefined);
+              setFormOpen(true);
+            }}
+            type="button"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            New routine
+          </Button>
+        </div>
       </div>
 
       {sorted.length === 0 ? (
@@ -94,6 +104,17 @@ export function RoutineManager() {
       )}
 
       <RoutineFormModal open={formOpen} onClose={() => setFormOpen(false)} routine={editing} />
+      <ConfirmDialog
+        open={clearAllOpen}
+        onClose={() => setClearAllOpen(false)}
+        onConfirm={async () => {
+          await clearAll();
+          toast("All routines cleared");
+        }}
+        title="Clear all routines?"
+        description="This removes every routine and all pending routine-based tasks from today onward, so you can start fresh."
+        confirmLabel="Clear all"
+      />
       <ConfirmDialog
         open={deleteTarget !== null}
         onClose={() => setDeleteTarget(null)}
