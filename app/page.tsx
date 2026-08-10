@@ -1,133 +1,81 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Greeting } from "@/components/dashboard/Greeting";
-import { CurrentTaskCard } from "@/components/dashboard/CurrentTaskCard";
-import { NextUpList } from "@/components/dashboard/NextUpList";
-import { ProgressSection } from "@/components/dashboard/ProgressSection";
-import { QuickActionsRow } from "@/components/dashboard/QuickActionsRow";
-import { StatsRow } from "@/components/dashboard/StatsRow";
-import { ExternalTools } from "@/components/dashboard/ExternalTools";
-import { Timeline } from "@/components/timeline/Timeline";
-import { useNow } from "@/hooks/useNow";
-import { useRoutineStore } from "@/stores/routineStore";
-import { useTaskStore, selectTasksForDate } from "@/stores/taskStore";
-import { useHabitStore } from "@/stores/habitStore";
-import { useFocusStore } from "@/stores/focusStore";
-import { useSettingsStore } from "@/stores/settingsStore";
-import { computeDayStatus, findConflicts } from "@/lib/scheduler";
-import { focusMinutesOn, weekStudyMinutes } from "@/lib/analytics";
-import { currentStreak } from "@/features/habits/streaks";
-import { todayKey } from "@/lib/dates";
-import { toast } from "@/stores/toastStore";
+import { useRouter } from "next/navigation";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Calendar, Flag, ListChecks, Sparkles, Target } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { AnimatedGradientText } from "@/components/ui/effects/AnimatedGradientText";
+import { copy } from "@/lib/copy";
 import { cardVariants, listStagger } from "@/lib/motion";
-import { celebrateBig } from "@/lib/confetti";
 
-export default function TodayPage() {
-  const now = useNow(30_000);
-  const today = todayKey();
+const FEATURES = [
+  { icon: Calendar, title: "Weekly schedule", body: "Drag tasks across days and auto-resolve time conflicts." },
+  { icon: Target, title: "Focus sessions", body: "Timed deep-work blocks that track your minutes." },
+  { icon: ListChecks, title: "Habits", body: "Daily habits with streaks that keep you honest." },
+  { icon: Flag, title: "Goals", body: "Longer-term goals tied back to your daily routine." },
+];
 
-  const routines = useRoutineStore((s) => s.routines);
-  const tasks = useTaskStore((s) => s.tasks);
-  const ensureDate = useTaskStore((s) => s.ensureDate);
-  const autoResolveDay = useTaskStore((s) => s.autoResolveDay);
-  const habits = useHabitStore((s) => s.habits);
-  const habitCompletions = useHabitStore((s) => s.completions);
-  const focusSessions = useFocusStore((s) => s.sessions);
-  const weekStartsOn = useSettingsStore((s) => s.settings.weekStartsOn);
-
-  useEffect(() => {
-    ensureDate(today, routines);
-  }, [today, routines, ensureDate]);
-
-  const todayTasks = useMemo(() => selectTasksForDate(tasks, today), [tasks, today]);
-  const dayStatus = useMemo(() => computeDayStatus(todayTasks, now), [todayTasks, now]);
-  const conflicts = useMemo(() => findConflicts(todayTasks), [todayTasks]);
-
-  const celebratedRef = useRef(false);
-  useEffect(() => {
-    if (dayStatus.totalCount > 0 && dayStatus.progressPct === 100 && !celebratedRef.current) {
-      celebratedRef.current = true;
-      celebrateBig();
-    } else if (dayStatus.progressPct < 100) {
-      celebratedRef.current = false;
-    }
-  }, [dayStatus.progressPct, dayStatus.totalCount]);
-
-  const currentId = dayStatus.current?.id;
-  const nextUp = todayTasks
-    .filter((t) => t.status === "pending" && t.id !== currentId && !dayStatus.overdueIds.includes(t.id))
-    .sort((a, b) => a.startTime.localeCompare(b.startTime))
-    .slice(0, 3);
-
-  const stats = useMemo(
-    () => [
-      { label: "Today", value: `${dayStatus.progressPct}%` },
-      { label: "Study this week", value: `${Math.round((weekStudyMinutes(tasks, now, weekStartsOn) / 60) * 10) / 10}h` },
-      { label: "Focus today", value: `${focusMinutesOn(focusSessions, today)} min` },
-      {
-        label: "Best streak",
-        value: `${habits.reduce((max, h) => Math.max(max, currentStreak(h.id, habitCompletions, now)), 0)}d`,
-      },
-    ],
-    [dayStatus.progressPct, tasks, now, weekStartsOn, focusSessions, today, habits, habitCompletions]
-  );
-
-  async function handleResolveConflicts() {
-    await autoResolveDay(today);
-    toast("Schedule conflicts resolved", "success");
-  }
+export default function HomePage() {
+  const router = useRouter();
+  const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
-      className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-8 md:py-10"
-      initial="initial"
-      animate="animate"
-      variants={listStagger}
-    >
-      <Greeting />
+    <div className="mx-auto max-w-3xl px-4 py-10 md:px-8 md:py-16">
+      <div className="relative overflow-hidden rounded-3xl border border-border bg-surface px-6 py-14 text-center">
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-16 -top-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl"
+          animate={reduceMotion ? undefined : { x: [0, 30, 0], y: [0, 20, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 bottom-[-4rem] h-56 w-56 rounded-full bg-fuchsia-500/15 blur-3xl"
+          animate={reduceMotion ? undefined : { x: [0, -20, 0], y: [0, -20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
 
-      <motion.div variants={cardVariants}>
-        <QuickActionsRow hasConflicts={conflicts.length > 0} onResolveConflicts={handleResolveConflicts} />
-      </motion.div>
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0, rotate: -8 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 18 }}
+          className="relative z-10 mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-[var(--shadow-pop)]"
+        >
+          <Sparkles className="h-6 w-6" aria-hidden="true" />
+        </motion.div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <CurrentTaskCard current={dayStatus.current} next={dayStatus.next} />
-          <motion.div variants={cardVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Today&rsquo;s Timeline</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Timeline tasks={todayTasks} dayStatus={dayStatus} />
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+        <h1 className="relative z-10 mt-5 text-4xl font-semibold tracking-tight md:text-5xl">
+          <AnimatedGradientText>{copy.tagline}</AnimatedGradientText>
+        </h1>
+        <p className="relative z-10 mx-auto mt-3 max-w-md text-base text-muted">{copy.subtitle}</p>
 
-        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
-          <motion.div variants={cardVariants}>
-            <ProgressSection
-              progressPct={dayStatus.progressPct}
-              completedCount={dayStatus.completedCount}
-              totalCount={dayStatus.totalCount}
-            />
-          </motion.div>
-          <motion.div variants={cardVariants}>
-            <NextUpList tasks={nextUp} />
-          </motion.div>
-          <motion.div variants={cardVariants}>
-            <StatsRow stats={stats} />
-          </motion.div>
-        </div>
+        <Button size="lg" className="relative z-10 mt-8" onClick={() => router.push("/today")} type="button">
+          Go to Today
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Button>
       </div>
 
-      <motion.div variants={cardVariants}>
-        <ExternalTools />
+      <motion.div
+        className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2"
+        initial="initial"
+        animate="animate"
+        variants={listStagger}
+      >
+        {FEATURES.map((f) => (
+          <motion.div key={f.title} variants={cardVariants}>
+            <Card className="flex items-start gap-3 p-4 text-left">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent">
+                <f.icon className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="font-medium">{f.title}</p>
+                <p className="mt-0.5 text-sm text-muted">{f.body}</p>
+              </div>
+            </Card>
+          </motion.div>
+        ))}
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

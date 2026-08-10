@@ -129,7 +129,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   disabled={isSubmitting}
-                  onClick={() => applyAndFinish("/", defaultSeedRoutines())}
+                  onClick={() => applyAndFinish("/today", defaultSeedRoutines())}
                   className="mt-4 block w-full text-sm text-muted transition-colors hover:text-foreground disabled:opacity-50"
                 >
                   Skip and use the default routine
@@ -241,7 +241,7 @@ export default function OnboardingPage() {
                   >
                     Customize
                   </Button>
-                  <Button className="flex-1" disabled={isSubmitting} onClick={() => applyAndFinish("/")} type="button">
+                  <Button className="flex-1" disabled={isSubmitting} onClick={() => applyAndFinish("/today")} type="button">
                     Use this routine
                   </Button>
                 </div>

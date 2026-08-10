@@ -81,6 +81,15 @@ export function weekDates(date: Date, weekStartsOn: DayOfWeek = 1): Date[] {
   return Array.from({ length: 7 }, (_, i) => addDays(start, i));
 }
 
+export type ScheduleViewMode = "day" | "3day" | "week";
+
+/** Dates visible for a view mode. "day"/"3day" run forward from `date`; "week" aligns to the week start. */
+export function visibleDates(date: Date, viewMode: ScheduleViewMode, weekStartsOn: DayOfWeek = 1): Date[] {
+  if (viewMode === "week") return weekDates(date, weekStartsOn);
+  const count = viewMode === "3day" ? 3 : 1;
+  return Array.from({ length: count }, (_, i) => addDays(date, i));
+}
+
 /** Days from the 1st of the month through `date`, inclusive (never into the future). */
 export function monthDatesSoFar(date: Date): Date[] {
   return eachDayOfInterval({ start: startOfMonth(date), end: date });

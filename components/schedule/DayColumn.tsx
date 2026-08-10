@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { AnimatePresence } from "framer-motion";
 import { AlertTriangle, Plus } from "lucide-react";
 import { WeekTaskCard } from "@/components/schedule/WeekTaskCard";
+import { ConflictModal } from "@/components/schedule/ConflictModal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/cn";
@@ -18,6 +19,7 @@ import type { Task } from "@/types";
 
 export function DayColumn({ date, label, tasks }: { date: Date; label: string; tasks: Task[] }) {
   const key = dateKey(date);
+  const [conflictModalOpen, setConflictModalOpen] = useState(false);
   const { setNodeRef, isOver } = useDroppable({ id: key });
   const autoResolveDay = useTaskStore((s) => s.autoResolveDay);
   const openCommandPalette = useUIStore((s) => s.openCommandPalette);
@@ -84,8 +86,14 @@ export function DayColumn({ date, label, tasks }: { date: Date; label: string; t
           <span className="flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" aria-hidden="true" /> Conflict
           </span>
-          <Button size="sm" variant="danger" className="h-6 px-2 text-[10px]" onClick={handleResolve} type="button">
-            Resolve
+          <Button
+            size="sm"
+            variant="danger"
+            className="h-6 px-2 text-[10px]"
+            onClick={() => setConflictModalOpen(true)}
+            type="button"
+          >
+            Why?
           </Button>
         </div>
       )}
@@ -115,6 +123,14 @@ export function DayColumn({ date, label, tasks }: { date: Date; label: string; t
           </AnimatePresence>
         )}
       </div>
+
+      <ConflictModal
+        open={conflictModalOpen}
+        onClose={() => setConflictModalOpen(false)}
+        conflicts={conflicts}
+        tasks={tasks}
+        onResolve={handleResolve}
+      />
     </div>
   );
 }

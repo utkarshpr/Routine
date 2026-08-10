@@ -118,6 +118,29 @@ export function findConflicts(tasks: Task[]): ConflictGroup[] {
   return groups;
 }
 
+export interface ConflictPair {
+  a: Task;
+  b: Task;
+  overlapMinutes: number;
+}
+
+/** Pairwise time overlaps within a single conflict group, for explaining why tasks collide. */
+export function describeConflictGroup(groupTasks: Task[]): ConflictPair[] {
+  const sorted = sortByStart(groupTasks);
+  const pairs: ConflictPair[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    for (let j = i + 1; j < sorted.length; j++) {
+      const aStart = timeToMinutes(sorted[i].startTime);
+      const aEnd = timeToMinutes(sorted[i].endTime);
+      const bStart = timeToMinutes(sorted[j].startTime);
+      const bEnd = timeToMinutes(sorted[j].endTime);
+      const overlapMinutes = Math.min(aEnd, bEnd) - Math.max(aStart, bStart);
+      if (overlapMinutes > 0) pairs.push({ a: sorted[i], b: sorted[j], overlapMinutes });
+    }
+  }
+  return pairs;
+}
+
 /**
  * Shift a task to a new start time, then cascade-shift subsequent FLEXIBLE
  * tasks forward just enough to avoid overlaps. FIXED tasks are never moved.

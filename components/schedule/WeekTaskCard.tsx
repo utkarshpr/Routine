@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { AnimatePresence, motion } from "framer-motion";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Check, GripVertical, MoreHorizontal, SkipForward, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { cn } from "@/lib/cn";
 import { addDays, addMinutesToTime, dateKey, formatTimeLabel } from "@/lib/dates";
@@ -26,22 +27,12 @@ export function WeekTaskCard({
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id });
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const completeTask = useTaskStore((s) => s.completeTask);
   const skipTask = useTaskStore((s) => s.skipTask);
   const removeTask = useTaskStore((s) => s.removeTask);
   const moveTask = useTaskStore((s) => s.moveTask);
   const moveTaskToDate = useTaskStore((s) => s.moveTaskToDate);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function onClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, [menuOpen]);
 
   const isDone = task.status === "completed";
   const isSkipped = task.status === "skipped";
@@ -105,79 +96,70 @@ export function WeekTaskCard({
           <p className={cn("truncate font-medium", (isDone || isSkipped) && "text-muted line-through")}>{task.title}</p>
           <p className="text-muted">{formatTimeLabel(task.startTime)}</p>
         </div>
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Task options"
-            className="flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 hover:bg-surface-2 group-hover:opacity-100"
-          >
-            <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
+        <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
+          <DropdownMenu.Trigger asChild>
+            <button
+              type="button"
+              aria-label="Task options"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 hover:bg-surface-2 group-hover:opacity-100"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </DropdownMenu.Trigger>
           <AnimatePresence>
             {menuOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -4 }}
-              transition={{ duration: 0.12 }}
-              className="absolute right-0 top-7 z-40 w-40 rounded-xl border border-border bg-surface p-1 shadow-xl"
-            >
-              {!isDone && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    completeTask(task.id);
-                    setMenuOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-surface-2"
-                >
-                  <Check className="h-3.5 w-3.5" aria-hidden="true" /> Complete
-                </button>
-              )}
-              {quickMoveOffsets().map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => moveBy(m)}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-surface-2"
-                >
-                  Move +{m}m
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={moveToTomorrow}
-                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-surface-2"
-              >
-                Move to tomorrow
-              </button>
-              {!isSkipped && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    skipTask(task.id);
-                    setMenuOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-surface-2"
-                >
-                  <SkipForward className="h-3.5 w-3.5" aria-hidden="true" /> Skip
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  removeTask(task.id);
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-danger hover:bg-danger/10"
-              >
-                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" /> Delete
-              </button>
-            </motion.div>
+              <DropdownMenu.Portal forceMount>
+                <DropdownMenu.Content asChild align="end" sideOffset={4} forceMount>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: 0.12 }}
+                    className="z-40 w-40 rounded-xl border border-border bg-surface p-1 text-xs shadow-xl"
+                  >
+                    {!isDone && (
+                      <DropdownMenu.Item
+                        onSelect={() => completeTask(task.id)}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left outline-none data-[highlighted]:bg-surface-2"
+                      >
+                        <Check className="h-3.5 w-3.5" aria-hidden="true" /> Complete
+                      </DropdownMenu.Item>
+                    )}
+                    {quickMoveOffsets().map((m) => (
+                      <DropdownMenu.Item
+                        key={m}
+                        onSelect={() => moveBy(m)}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left outline-none data-[highlighted]:bg-surface-2"
+                      >
+                        Move +{m}m
+                      </DropdownMenu.Item>
+                    ))}
+                    <DropdownMenu.Item
+                      onSelect={moveToTomorrow}
+                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left outline-none data-[highlighted]:bg-surface-2"
+                    >
+                      Move to tomorrow
+                    </DropdownMenu.Item>
+                    {!isSkipped && (
+                      <DropdownMenu.Item
+                        onSelect={() => skipTask(task.id)}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left outline-none data-[highlighted]:bg-surface-2"
+                      >
+                        <SkipForward className="h-3.5 w-3.5" aria-hidden="true" /> Skip
+                      </DropdownMenu.Item>
+                    )}
+                    <DropdownMenu.Item
+                      onSelect={() => removeTask(task.id)}
+                      className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-danger outline-none data-[highlighted]:bg-danger/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" /> Delete
+                    </DropdownMenu.Item>
+                  </motion.div>
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
             )}
           </AnimatePresence>
-        </div>
+        </DropdownMenu.Root>
       </div>
     </motion.div>
   );
