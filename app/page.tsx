@@ -1,69 +1,133 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useMemo, useRef } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Greeting } from "@/components/dashboard/Greeting";
+import { CurrentTaskCard } from "@/components/dashboard/CurrentTaskCard";
+import { NextUpList } from "@/components/dashboard/NextUpList";
+import { ProgressSection } from "@/components/dashboard/ProgressSection";
+import { QuickActionsRow } from "@/components/dashboard/QuickActionsRow";
+import { StatsRow } from "@/components/dashboard/StatsRow";
+import { ExternalTools } from "@/components/dashboard/ExternalTools";
+import { Timeline } from "@/components/timeline/Timeline";
+import { useNow } from "@/hooks/useNow";
+import { useRoutineStore } from "@/stores/routineStore";
+import { useTaskStore, selectTasksForDate } from "@/stores/taskStore";
+import { useHabitStore } from "@/stores/habitStore";
+import { useFocusStore } from "@/stores/focusStore";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { computeDayStatus, findConflicts } from "@/lib/scheduler";
+import { focusMinutesOn, weekStudyMinutes } from "@/lib/analytics";
+import { currentStreak } from "@/features/habits/streaks";
+import { todayKey } from "@/lib/dates";
+import { toast } from "@/stores/toastStore";
+import { cardVariants, listStagger } from "@/lib/motion";
+import { celebrateBig } from "@/lib/confetti";
+
+export default function TodayPage() {
+  const now = useNow(30_000);
+  const today = todayKey();
+
+  const routines = useRoutineStore((s) => s.routines);
+  const tasks = useTaskStore((s) => s.tasks);
+  const ensureDate = useTaskStore((s) => s.ensureDate);
+  const autoResolveDay = useTaskStore((s) => s.autoResolveDay);
+  const habits = useHabitStore((s) => s.habits);
+  const habitCompletions = useHabitStore((s) => s.completions);
+  const focusSessions = useFocusStore((s) => s.sessions);
+  const weekStartsOn = useSettingsStore((s) => s.settings.weekStartsOn);
+
+  useEffect(() => {
+    ensureDate(today, routines);
+  }, [today, routines, ensureDate]);
+
+  const todayTasks = useMemo(() => selectTasksForDate(tasks, today), [tasks, today]);
+  const dayStatus = useMemo(() => computeDayStatus(todayTasks, now), [todayTasks, now]);
+  const conflicts = useMemo(() => findConflicts(todayTasks), [todayTasks]);
+
+  const celebratedRef = useRef(false);
+  useEffect(() => {
+    if (dayStatus.totalCount > 0 && dayStatus.progressPct === 100 && !celebratedRef.current) {
+      celebratedRef.current = true;
+      celebrateBig();
+    } else if (dayStatus.progressPct < 100) {
+      celebratedRef.current = false;
+    }
+  }, [dayStatus.progressPct, dayStatus.totalCount]);
+
+  const currentId = dayStatus.current?.id;
+  const nextUp = todayTasks
+    .filter((t) => t.status === "pending" && t.id !== currentId && !dayStatus.overdueIds.includes(t.id))
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+    .slice(0, 3);
+
+  const stats = useMemo(
+    () => [
+      { label: "Today", value: `${dayStatus.progressPct}%` },
+      { label: "Study this week", value: `${Math.round((weekStudyMinutes(tasks, now, weekStartsOn) / 60) * 10) / 10}h` },
+      { label: "Focus today", value: `${focusMinutesOn(focusSessions, today)} min` },
+      {
+        label: "Best streak",
+        value: `${habits.reduce((max, h) => Math.max(max, currentStreak(h.id, habitCompletions, now)), 0)}d`,
+      },
+    ],
+    [dayStatus.progressPct, tasks, now, weekStartsOn, focusSessions, today, habits, habitCompletions]
+  );
+
+  async function handleResolveConflicts() {
+    await autoResolveDay(today);
+    toast("Schedule conflicts resolved", "success");
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <motion.div
+      className="mx-auto max-w-7xl space-y-6 px-4 py-6 md:px-8 md:py-10"
+      initial="initial"
+      animate="animate"
+      variants={listStagger}
+    >
+      <Greeting />
+
+      <motion.div variants={cardVariants}>
+        <QuickActionsRow hasConflicts={conflicts.length > 0} onResolveConflicts={handleResolveConflicts} />
+      </motion.div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <CurrentTaskCard current={dayStatus.current} next={dayStatus.next} />
+          <motion.div variants={cardVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Today&rsquo;s Timeline</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Timeline tasks={todayTasks} dayStatus={dayStatus} />
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        <div className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+          <motion.div variants={cardVariants}>
+            <ProgressSection
+              progressPct={dayStatus.progressPct}
+              completedCount={dayStatus.completedCount}
+              totalCount={dayStatus.totalCount}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </motion.div>
+          <motion.div variants={cardVariants}>
+            <NextUpList tasks={nextUp} />
+          </motion.div>
+          <motion.div variants={cardVariants}>
+            <StatsRow stats={stats} />
+          </motion.div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <motion.div variants={cardVariants}>
+        <ExternalTools />
+      </motion.div>
+    </motion.div>
   );
 }
