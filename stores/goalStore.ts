@@ -30,7 +30,11 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   },
   seed: async (goals) => {
     await Promise.all(goals.map((g) => db.put("goals", g)));
-    set((state) => ({ goals: [...state.goals, ...goals] }));
+    set((state) => {
+      const byId = new Map(state.goals.map((goal) => [goal.id, goal]));
+      goals.forEach((goal) => byId.set(goal.id, goal));
+      return { goals: Array.from(byId.values()) };
+    });
   },
   add: async (partial) => {
     const goal: Goal = { ...partial, id: createId(), createdAt: new Date().toISOString() };

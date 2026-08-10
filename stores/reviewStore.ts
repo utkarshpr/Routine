@@ -7,6 +7,7 @@ interface ReviewState {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   upsert: (key: string, weekStart: string, partial: Partial<WeeklyReview>) => Promise<void>;
+  remove: (key: string) => Promise<void>;
 }
 
 export const useReviewStore = create<ReviewState>((set, get) => ({
@@ -34,5 +35,9 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
         ? state.reviews.map((r) => (r.id === key ? updated : r))
         : [...state.reviews, updated],
     }));
+  },
+  remove: async (key) => {
+    await db.remove("weeklyReviews", key);
+    set((state) => ({ reviews: state.reviews.filter((review) => review.id !== key) }));
   },
 }));

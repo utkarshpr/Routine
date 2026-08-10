@@ -28,7 +28,11 @@ export const useRoutineStore = create<RoutineState>((set, get) => ({
   },
   seed: async (routines) => {
     await Promise.all(routines.map((r) => db.put("routines", r)));
-    set((state) => ({ routines: [...state.routines, ...routines].sort((a, b) => a.order - b.order) }));
+    set((state) => {
+      const byId = new Map(state.routines.map((routine) => [routine.id, routine]));
+      routines.forEach((routine) => byId.set(routine.id, routine));
+      return { routines: Array.from(byId.values()).sort((a, b) => a.order - b.order) };
+    });
   },
   add: async (partial) => {
     const now = new Date().toISOString();
@@ -54,6 +58,7 @@ export const useRoutineStore = create<RoutineState>((set, get) => ({
   remove: async (id) => {
     await db.remove("routines", id);
     set((state) => ({ routines: state.routines.filter((r) => r.id !== id) }));
+    await useTaskStore.getState().removeFutureByRoutineIds([id], todayKey());
   },
   clearAll: async () => {
     const ids = get().routines.map((routine) => routine.id);

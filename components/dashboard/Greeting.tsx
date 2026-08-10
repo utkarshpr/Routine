@@ -9,6 +9,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 export function Greeting() {
   const now = useNow(60_000);
   const userName = useSettingsStore((s) => s.settings.userName);
+  const greetingLine = userName ? `${greetingForNow(now)}, ${userName}` : greetingForNow(now);
 
   return (
     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
@@ -18,7 +19,7 @@ export function Greeting() {
           animate={{ opacity: [1, 0.4, 1] }}
           transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         />
-        {greetingForNow(now)}, {userName}
+        {greetingLine}
       </p>
       <h1 className="mt-3 text-4xl font-semibold tracking-[-0.06em] text-foreground md:text-6xl md:leading-[0.94]">
         {format(now, "EEEE, MMMM d")}

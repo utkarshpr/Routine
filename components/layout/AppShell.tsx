@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Plus, WifiOff } from "lucide-react";
@@ -10,6 +10,9 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
 import { Toaster } from "@/components/ui/Toaster";
 import { Tooltip, TooltipProvider } from "@/components/ui/Tooltip";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { Label, TextField } from "@/components/ui/Field";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { ShortcutsHelp } from "@/components/command/ShortcutsHelp";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -24,7 +27,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const online = useOnlineStatus();
-  const hasOnboarded = useSettingsStore((s) => s.settings.hasOnboarded);
+  const settings = useSettingsStore((s) => s.settings);
+  const updateSettings = useSettingsStore((s) => s.update);
+  const hasOnboarded = settings.hasOnboarded;
+  const [nameDraft, setNameDraft] = useState(settings.userName);
 
   const commandPaletteOpen = useUIStore((s) => s.commandPaletteOpen);
   const commandPaletteMode = useUIStore((s) => s.commandPaletteMode);
@@ -57,6 +63,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const isOnboarding = pathname === "/onboarding";
   const needsOnboardingRedirect = ready && !hasOnboarded && !isOnboarding;
+  const shouldPromptForName = ready && hasOnboarded && !isOnboarding && settings.userName.trim().length === 0;
 
   if (!ready || needsOnboardingRedirect) {
     // While the redirect effect above is navigating to /onboarding, don't mount
@@ -132,6 +139,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         initialDate={commandPaletteAddDate ?? undefined}
       />
       <ShortcutsHelp open={shortcutsHelpOpen} onClose={closeShortcutsHelp} />
+      <Modal open={shouldPromptForName} onClose={() => undefined} title="Tell us your name" className="max-w-md">
+        <h2 className="text-xl font-semibold tracking-tight">Make it yours</h2>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Start with a blank workspace and add your name once, so Daily OS feels personal from the beginning.
+        </p>
+        <div className="mt-5">
+          <Label htmlFor="first-run-name">Your name</Label>
+          <TextField
+            id="first-run-name"
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            placeholder="Enter your name"
+            autoFocus
+          />
+        </div>
+        <div className="mt-6 flex justify-end">
+          <Button
+            type="button"
+            disabled={nameDraft.trim().length === 0}
+            onClick={() => updateSettings({ userName: nameDraft.trim() })}
+          >
+            Save name
+          </Button>
+        </div>
+      </Modal>
     </div>
     </TooltipProvider>
   );

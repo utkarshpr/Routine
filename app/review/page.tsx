@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Trash2 } from "lucide-react";
 import { format, getISOWeek } from "date-fns";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Label, TextAreaField } from "@/components/ui/Field";
 import { StatsRow } from "@/components/dashboard/StatsRow";
 import { addDays, dateKey, formatDurationLabel, parseDateKey, weekDates, weekKey, weekStart } from "@/lib/dates";
@@ -25,6 +26,7 @@ export default function ReviewPage() {
   const routines = useRoutineStore((s) => s.routines);
   const reviews = useReviewStore((s) => s.reviews);
   const upsert = useReviewStore((s) => s.upsert);
+  const removeReview = useReviewStore((s) => s.remove);
 
   const days = weekDates(anchor, weekStartsOn);
   const key = weekKey(anchor);
@@ -38,12 +40,13 @@ export default function ReviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateKey(days[0]), routines]);
 
-  const stats = useMemo(() => computeWeeklyStats(tasks, days), [tasks, days]);
+  const stats = computeWeeklyStats(tasks, days);
 
   const [wentWell, setWentWell] = useState(review?.wentWell ?? "");
   const [needsImprovement, setNeedsImprovement] = useState(review?.needsImprovement ?? "");
   const [nextWeekFocus, setNextWeekFocus] = useState(review?.nextWeekFocus ?? "");
   const [lastKey, setLastKey] = useState(key);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   if (key !== lastKey) {
     setLastKey(key);
@@ -189,10 +192,8 @@ export default function ReviewPage() {
                   const start = parseDateKey(item.weekStart);
                   const isActive = item.id === key;
                   return (
-                    <button
+                    <div
                       key={item.id}
-                      type="button"
-                      onClick={() => setAnchor(start)}
                       className={`w-full rounded-2xl border px-3 py-3 text-left transition-colors ${
                         isActive
                           ? "border-accent bg-accent/10"
@@ -203,10 +204,23 @@ export default function ReviewPage() {
                       <p className="mt-1 text-xs text-muted">
                         {format(start, "MMM d")} - {format(addDays(start, 6), "MMM d, yyyy")}
                       </p>
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
+                        {item.wentWell || item.needsImprovement || item.nextWeekFocus || "Saved weekly review"}
+                      </p>
                       <p className="mt-1 text-xs text-muted">
                         Updated {format(new Date(item.updatedAt), "MMM d, yyyy")}
                       </p>
-                    </button>
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button variant="secondary" size="sm" type="button" onClick={() => setAnchor(start)}>
+                          <Eye className="h-4 w-4" aria-hidden="true" />
+                          Open
+                        </Button>
+                        <Button variant="ghost" size="sm" type="button" onClick={() => setDeleteTarget(item.id)}>
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -214,6 +228,23 @@ export default function ReviewPage() {
           </Card>
         </motion.div>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          await removeReview(deleteTarget);
+          if (deleteTarget === key) {
+            setWentWell("");
+            setNeedsImprovement("");
+            setNextWeekFocus("");
+          }
+          toast("Review deleted");
+        }}
+        title={`Delete review "${deleteTarget ?? ""}"?`}
+        description="This saved weekly review will be removed from local storage."
+      />
     </motion.div>
   );
 }

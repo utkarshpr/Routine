@@ -12,6 +12,7 @@ interface HabitState {
   add: (habit: Omit<Habit, "id" | "createdAt" | "archived">) => Promise<Habit>;
   update: (id: string, partial: Partial<Habit>) => Promise<void>;
   remove: (id: string) => Promise<void>;
+  clearAll: () => Promise<void>;
   toggleCompletion: (habitId: string, date: string) => Promise<void>;
 }
 
@@ -28,7 +29,11 @@ export const useHabitStore = create<HabitState>((set, get) => ({
   },
   seed: async (habits) => {
     await Promise.all(habits.map((h) => db.put("habits", h)));
-    set((state) => ({ habits: [...state.habits, ...habits] }));
+    set((state) => {
+      const byId = new Map(state.habits.map((habit) => [habit.id, habit]));
+      habits.forEach((habit) => byId.set(habit.id, habit));
+      return { habits: Array.from(byId.values()) };
+    });
   },
   add: async (partial) => {
     const habit: Habit = { ...partial, id: createId(), createdAt: new Date().toISOString(), archived: false };
@@ -44,8 +49,30 @@ export const useHabitStore = create<HabitState>((set, get) => ({
     set((state) => ({ habits: state.habits.map((h) => (h.id === id ? updated : h)) }));
   },
   remove: async (id) => {
-    await db.remove("habits", id);
-    set((state) => ({ habits: state.habits.filter((h) => h.id !== id) }));
+    const completionIds = get()
+      .completions
+      .filter((completion) => completion.habitId === id)
+      .map((completion) => completion.id);
+
+    await Promise.all([
+      db.remove("habits", id),
+      ...completionIds.map((completionId) => db.remove("habitCompletions", completionId)),
+    ]);
+
+    set((state) => ({
+      habits: state.habits.filter((h) => h.id !== id),
+      completions: state.completions.filter((completion) => completion.habitId !== id),
+    }));
+  },
+  clearAll: async () => {
+    const { habits, completions } = get();
+
+    await Promise.all([
+      ...habits.map((habit) => db.remove("habits", habit.id)),
+      ...completions.map((completion) => db.remove("habitCompletions", completion.id)),
+    ]);
+
+    set({ habits: [], completions: [] });
   },
   toggleCompletion: async (habitId, date) => {
     const existing = get().completions.find((c) => c.habitId === habitId && c.date === date);

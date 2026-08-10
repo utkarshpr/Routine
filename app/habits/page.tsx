@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -17,10 +17,12 @@ import type { Habit } from "@/types";
 export default function HabitsPage() {
   const habits = useHabitStore((s) => s.habits);
   const remove = useHabitStore((s) => s.remove);
+  const clearAll = useHabitStore((s) => s.clearAll);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Habit | undefined>(undefined);
   const [deleteTarget, setDeleteTarget] = useState<Habit | null>(null);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
 
   return (
     <motion.div
@@ -31,17 +33,25 @@ export default function HabitsPage() {
     >
       <motion.div variants={cardVariants} className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Habits</h1>
-        <Button
-          size="sm"
-          onClick={() => {
-            setEditing(undefined);
-            setFormOpen(true);
-          }}
-          type="button"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          New habit
-        </Button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {habits.length > 0 && (
+            <Button variant="secondary" size="sm" onClick={() => setClearAllOpen(true)} type="button">
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Clear all
+            </Button>
+          )}
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditing(undefined);
+              setFormOpen(true);
+            }}
+            type="button"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            New habit
+          </Button>
+        </div>
       </motion.div>
 
       {habits.length === 0 ? (
@@ -76,6 +86,17 @@ export default function HabitsPage() {
         }}
         title={`Delete "${deleteTarget?.title}"?`}
         description="Its history will be removed too."
+      />
+      <ConfirmDialog
+        open={clearAllOpen}
+        onClose={() => setClearAllOpen(false)}
+        onConfirm={() => {
+          clearAll();
+          setClearAllOpen(false);
+          toast("All habits cleared");
+        }}
+        title="Delete all habits?"
+        description="This will remove every habit and all of their saved completion history."
       />
     </motion.div>
   );

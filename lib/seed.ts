@@ -5,6 +5,7 @@ import type { Category, DayOfWeek, Goal, Habit, Routine, TaskType } from "@/type
 
 const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6];
 const WEEKDAYS: DayOfWeek[] = [1, 2, 3, 4, 5];
+const DEFAULT_GOAL_ID = "seed-goal-sse-prep";
 
 interface RoutineBlueprint {
   title: string;
@@ -60,7 +61,10 @@ export function buildRoutinesFromBlueprint(
 }
 
 export function defaultSeedRoutines(): Routine[] {
-  return buildRoutinesFromBlueprint(DEFAULT_ROUTINE_BLUEPRINT);
+  return buildRoutinesFromBlueprint(DEFAULT_ROUTINE_BLUEPRINT).map((routine, index) => ({
+    ...routine,
+    id: `seed-routine-${index}`,
+  }));
 }
 
 export type OnboardingGoal = "DSA" | "Golang" | "HLD" | "LLD" | "Fitness" | "Personal";
@@ -168,16 +172,16 @@ export function buildAdaptedRoutineBlueprint(answers: OnboardingAnswers): Routin
 
 export function defaultSeedHabits(): Habit[] {
   const now = new Date().toISOString();
-  const defs: { title: string; icon: string; color: string }[] = [
-    { title: "Gym", icon: "Dumbbell", color: "#f97316" },
-    { title: "Study", icon: "Braces", color: "#0ea5e9" },
-    { title: "Read", icon: "Sparkles", color: "#10b981" },
-    { title: "Meditate", icon: "Moon", color: "#64748b" },
-    { title: "Drink Water", icon: "Circle", color: "#0ea5e9" },
-    { title: "Sleep before 11", icon: "Moon", color: "#8b5cf6" },
+  const defs: { id: string; title: string; icon: string; color: string }[] = [
+    { id: "seed-habit-gym", title: "Gym", icon: "Dumbbell", color: "#f97316" },
+    { id: "seed-habit-study", title: "Study", icon: "Braces", color: "#0ea5e9" },
+    { id: "seed-habit-read", title: "Read", icon: "Sparkles", color: "#10b981" },
+    { id: "seed-habit-meditate", title: "Meditate", icon: "Moon", color: "#64748b" },
+    { id: "seed-habit-drink-water", title: "Drink Water", icon: "Circle", color: "#0ea5e9" },
+    { id: "seed-habit-sleep-before-11", title: "Sleep before 11", icon: "Moon", color: "#8b5cf6" },
   ];
   return defs.map((d) => ({
-    id: createId(),
+    id: d.id,
     title: d.title,
     icon: d.icon,
     color: d.color,
@@ -191,17 +195,17 @@ export function defaultSeedGoals(): Goal[] {
   const now = new Date().toISOString();
   return [
     {
-      id: createId(),
+      id: DEFAULT_GOAL_ID,
       title: "₹1 Cr SSE Preparation",
       areas: ["DSA", "HLD", "LLD", "Golang", "Work"],
       targetDate: "2026-12-31",
       progress: 15,
       milestones: [
-        { id: createId(), title: "300 DSA problems solved", done: false },
-        { id: createId(), title: "20 HLD designs practiced", done: false },
-        { id: createId(), title: "10 LLD designs practiced", done: false },
-        { id: createId(), title: "Ship 2 Golang projects", done: false },
-        { id: createId(), title: "Mock interviews x10", done: false },
+        { id: "seed-goal-milestone-1", title: "300 DSA problems solved", done: false },
+        { id: "seed-goal-milestone-2", title: "20 HLD designs practiced", done: false },
+        { id: "seed-goal-milestone-3", title: "10 LLD designs practiced", done: false },
+        { id: "seed-goal-milestone-4", title: "Ship 2 Golang projects", done: false },
+        { id: "seed-goal-milestone-5", title: "Mock interviews x10", done: false },
       ],
       notes: "",
       createdAt: now,

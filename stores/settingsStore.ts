@@ -4,7 +4,7 @@ import type { Settings } from "@/types";
 
 export const DEFAULT_SETTINGS: Settings = {
   id: "settings",
-  userName: "Utkarsh",
+  userName: "",
   hasOnboarded: false,
   appearance: "system",
   accentColor: "#2563eb",
