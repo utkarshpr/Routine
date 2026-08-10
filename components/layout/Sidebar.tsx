@@ -12,9 +12,9 @@ export function Sidebar({ onOpenCommandPalette }: { onOpenCommandPalette: () => 
 
   return (
     <aside className="hidden md:flex md:w-[280px] md:flex-col md:px-5 md:py-6">
-      <div className="flex h-full flex-col rounded-[32px] border border-white/45 bg-surface/88 px-4 py-5 shadow-[var(--shadow-card)] backdrop-blur-2xl dark:border-white/10">
+      <div className="flex h-full flex-col rounded-[28px] border border-border bg-surface px-4 py-5 shadow-[var(--shadow-card)] backdrop-blur-md">
       <div className="mb-7 flex items-center gap-3 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/35 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--accent)_78%,white),var(--accent))] text-accent-foreground shadow-[var(--shadow-card)] dark:border-white/12">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-accent text-accent-foreground shadow-[var(--shadow-card)]">
           <Sparkles className="h-4 w-4" aria-hidden="true" />
         </div>
         <div>
@@ -26,11 +26,11 @@ export function Sidebar({ onOpenCommandPalette }: { onOpenCommandPalette: () => 
       <button
         type="button"
         onClick={onOpenCommandPalette}
-        className="mb-5 flex items-center gap-3 rounded-2xl border border-white/45 bg-surface-2/90 px-4 py-3 text-sm text-muted shadow-[0_10px_24px_-18px_rgba(15,23,42,0.24)] backdrop-blur-xl transition-colors hover:border-white/70 hover:text-foreground dark:border-white/10 dark:hover:border-white/16"
+        className="mb-5 flex items-center gap-3 rounded-2xl border border-border bg-surface-2 px-4 py-3 text-sm text-muted shadow-[var(--shadow-card)] transition-colors hover:border-border-strong hover:text-foreground"
       >
         <Search className="h-4 w-4" aria-hidden="true" />
         <span>Search</span>
-        <kbd className="ml-auto rounded-full border border-white/50 bg-white/70 px-2 py-0.5 text-[10px] text-foreground/75 dark:border-white/12 dark:bg-white/8 dark:text-foreground/70">
+        <kbd className="ml-auto rounded-full border border-border bg-background px-2 py-0.5 text-[10px] text-foreground/75">
           ⌘K
         </kbd>
       </button>
@@ -50,14 +50,14 @@ export function Sidebar({ onOpenCommandPalette }: { onOpenCommandPalette: () => 
               {active && (
                 <motion.span
                   layoutId="sidebar-active-pill"
-                  className="absolute inset-0 rounded-2xl border border-white/55 bg-white/80 shadow-[0_18px_32px_-28px_rgba(15,23,42,0.35)] dark:border-white/12 dark:bg-white/8"
+                  className="absolute inset-0 rounded-2xl border border-border-strong bg-surface-2 shadow-[var(--shadow-card)]"
                   transition={{ type: "spring", stiffness: 400, damping: 32 }}
                 />
               )}
               <div
                 className={cn(
                   "relative z-10 flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
-                  active ? "bg-accent/10 text-accent" : "bg-white/45 text-muted dark:bg-white/6"
+                  active ? "bg-accent text-accent-foreground" : "bg-surface-2 text-muted"
                 )}
               >
                 <item.icon className="h-4 w-4" aria-hidden="true" />

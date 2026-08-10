@@ -27,7 +27,7 @@ export function Card({
       ref={ref}
       onMouseMove={spotlight ? handleMouseMove : onMouseMove}
       className={cn(
-        "rounded-[28px] border border-white/45 bg-surface/90 backdrop-blur-2xl shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color,background-color] duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:shadow-[var(--shadow-card-hover)] dark:border-white/10 dark:hover:border-white/16",
+        "rounded-[24px] border border-border bg-surface shadow-[var(--shadow-card)] transition-[transform,box-shadow,border-color,background-color] duration-300 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-card-hover)]",
         spotlight && "group relative overflow-hidden",
         className
       )}
@@ -35,7 +35,7 @@ export function Card({
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/75 to-transparent dark:via-white/18"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
       />
       {spotlight && (
         <div
@@ -43,7 +43,7 @@ export function Card({
           className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              "radial-gradient(260px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), color-mix(in srgb, var(--accent) 16%, transparent), transparent 72%)",
+              "radial-gradient(220px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,255,255,0.055), transparent 72%)",
           }}
         />
       )}

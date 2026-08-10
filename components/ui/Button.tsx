@@ -7,10 +7,10 @@ type Size = "sm" | "md" | "lg";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
   primary:
-    "border border-white/40 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--accent)_88%,white),var(--accent))] text-accent-foreground shadow-[var(--shadow-card)] hover:brightness-105 dark:border-white/12",
+    "border border-border bg-accent text-accent-foreground shadow-[var(--shadow-card)] hover:opacity-92",
   secondary:
-    "border border-white/40 bg-surface/92 text-foreground shadow-[0_12px_24px_-20px_rgba(15,23,42,0.25)] backdrop-blur-xl hover:border-white/70 hover:bg-white/70 dark:border-white/10 dark:hover:border-white/16 dark:hover:bg-white/8",
-  ghost: "bg-transparent text-foreground hover:bg-white/55 dark:hover:bg-white/8",
+    "border border-border bg-surface-2 text-foreground shadow-[var(--shadow-card)] hover:border-border-strong hover:bg-surface",
+  ghost: "bg-transparent text-foreground hover:bg-surface-2",
   danger: "bg-danger text-white shadow-[var(--shadow-card)] hover:brightness-110",
 };
 

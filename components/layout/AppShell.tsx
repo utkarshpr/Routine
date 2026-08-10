@@ -81,12 +81,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="relative flex min-h-screen overflow-x-hidden">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[340px] bg-[radial-gradient(55%_70%_at_50%_0%,color-mix(in_srgb,var(--accent)_12%,white),transparent_72%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[220px] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),transparent)]"
       />
       <Sidebar onOpenCommandPalette={() => openCommandPalette("search")} />
       <div className="relative flex min-h-screen min-w-0 flex-1 flex-col">
         {!online && (
-          <div className="mx-4 mt-4 flex items-center justify-center gap-2 rounded-full border border-white/45 bg-surface/88 px-4 py-2 text-xs text-muted shadow-[var(--shadow-card)] backdrop-blur-xl dark:border-white/10 md:mx-6">
+          <div className="mx-4 mt-4 flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-xs text-muted shadow-[var(--shadow-card)] backdrop-blur-md md:mx-6">
             <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
             You&rsquo;re offline — changes are saved locally and stay put.
           </div>
@@ -115,7 +115,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
           transition={{ type: "spring", stiffness: 500, damping: 25 }}
-          className="fixed bottom-22 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-white/45 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--accent)_82%,white),var(--accent))] text-accent-foreground shadow-[var(--shadow-pop)] md:bottom-8 md:right-8 dark:border-white/14"
+          className="fixed bottom-22 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-border bg-accent text-accent-foreground shadow-[var(--shadow-pop)] md:bottom-8 md:right-8"
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </motion.button>

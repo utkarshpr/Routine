@@ -11,7 +11,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-3 bottom-3 z-40 flex items-stretch justify-around rounded-[28px] border border-white/50 bg-surface/88 px-1.5 backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] shadow-[var(--shadow-pop)] dark:border-white/10 md:hidden"
+      className="fixed inset-x-3 bottom-3 z-40 flex items-stretch justify-around rounded-[26px] border border-border bg-surface px-1.5 backdrop-blur-md pb-[env(safe-area-inset-bottom)] shadow-[var(--shadow-pop)] md:hidden"
       aria-label="Primary"
     >
       {MOBILE_NAV_ITEMS.map((item) => {
@@ -29,7 +29,7 @@ export function BottomNav() {
             {active && (
               <motion.span
                 layoutId="bottomnav-active-pill"
-                className="absolute inset-0 rounded-[22px] border border-white/55 bg-white/82 dark:border-white/12 dark:bg-white/8"
+                className="absolute inset-0 rounded-[22px] border border-border-strong bg-surface-2"
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
               />
             )}
