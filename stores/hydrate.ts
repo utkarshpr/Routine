@@ -30,7 +30,13 @@ export function useHydrateApp(): boolean {
         useReviewStore.getState().hydrate(),
       ]);
 
-      const isFreshInstall = useRoutineStore.getState().routines.length === 0;
+      const isFreshInstall =
+        useRoutineStore.getState().routines.length === 0 &&
+        useHabitStore.getState().habits.length === 0 &&
+        useGoalStore.getState().goals.length === 0 &&
+        useTaskStore.getState().tasks.length === 0 &&
+        useFocusStore.getState().sessions.length === 0 &&
+        useReviewStore.getState().reviews.length === 0;
       if (isFreshInstall) {
         await Promise.all([
           useRoutineStore.getState().seed(defaultSeedRoutines()),
