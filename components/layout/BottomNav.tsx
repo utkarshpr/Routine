@@ -2,42 +2,286 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { MOBILE_NAV_ITEMS } from "@/lib/nav";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sun,
+  CalendarDays,
+  CircleDot,
+  CheckSquare,
+  MoreHorizontal,
+  Target,
+  Settings,
+  House,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
+
+const MOBILE_NAV_ITEMS = [
+  {
+    label: "Home",
+    href: "/",
+    icon: House,
+  },
+  {
+    label: "Today",
+    href: "/today",
+    icon: Sun,
+  },
+  {
+    label: "Schedule",
+    href: "/schedule",
+    icon: CalendarDays,
+  },
+  {
+    label: "Focus",
+    href: "/focus",
+    icon: CircleDot,
+  },
+
+];
+
+const MORE_ITEMS = [
+  {
+    label: "Habits",
+    href: "/habits",
+    icon: CheckSquare,
+  },
+  {
+    label: "Goals",
+    href: "/goals",
+    icon: Target,
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: Settings,
+  },
+
+];
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const moreActive = MORE_ITEMS.some(
+    (item) =>
+      pathname === item.href ||
+      pathname.startsWith(`${item.href}/`)
+  );
 
   return (
-    <nav
-      className="fixed inset-x-3 bottom-3 z-40 flex items-stretch justify-around rounded-[26px] border border-border bg-surface px-1.5 backdrop-blur-md pb-[env(safe-area-inset-bottom)] shadow-[var(--shadow-pop)] md:hidden"
-      aria-label="Primary"
-    >
-      {MOBILE_NAV_ITEMS.map((item) => {
-        const active = pathname === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-[22px] py-3 text-[11px] font-medium tracking-[-0.01em] transition-colors",
-              active ? "text-foreground" : "text-muted"
-            )}
-            aria-current={active ? "page" : undefined}
-          >
-            {active && (
-              <motion.span
-                layoutId="bottomnav-active-pill"
-                className="absolute inset-0 rounded-[22px] border border-border-strong bg-surface-2"
-                transition={{ type: "spring", stiffness: 400, damping: 32 }}
+    <>
+      {/* More menu */}
+      <AnimatePresence>
+        {moreOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.button
+              type="button"
+              aria-label="Close menu"
+              className="fixed inset-0 z-30 bg-black/20 md:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMoreOpen(false)}
+            />
+
+            {/* Menu */}
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.96 }}
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 30,
+              }}
+              className="
+                fixed
+                right-4
+                bottom-[88px]
+                z-50
+                w-48
+                overflow-hidden
+                rounded-2xl
+                border border-white/[0.08]
+                bg-[#15171c]/95
+                p-1.5
+                shadow-[0_20px_50px_rgba(0,0,0,0.4)]
+                backdrop-blur-2xl
+                md:hidden
+              "
+            >
+              {MORE_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const active = pathname === item.href;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMoreOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm transition-colors",
+                      active
+                        ? "bg-white/[0.07] text-white"
+                        : "text-white/60 hover:bg-white/[0.05] hover:text-white"
+                    )}
+                  >
+                    <Icon className="h-[18px] w-[18px]" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom navigation */}
+      <nav
+        className="
+          fixed inset-x-4 bottom-4 z-40
+          md:hidden
+          flex items-center
+          h-[68px]
+          rounded-[24px]
+          border border-white/[0.08]
+          bg-[#111318]/90
+          px-2
+          shadow-[0_12px_40px_rgba(0,0,0,0.35)]
+          backdrop-blur-2xl
+        "
+        aria-label="Primary"
+      >
+        {MOBILE_NAV_ITEMS.map((item) => {
+          const active =
+            pathname === item.href ||
+            pathname.startsWith(`${item.href}/`);
+
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="
+                relative
+                flex-1
+                h-full
+                flex
+                flex-col
+                items-center
+                justify-center
+                gap-1
+                rounded-[18px]
+                text-[10px]
+                font-medium
+              "
+              aria-current={active ? "page" : undefined}
+            >
+              {active && (
+                <motion.span
+                  layoutId="bottomnav-active"
+                  className="
+                    absolute
+                    inset-x-1
+                    inset-y-2
+                    rounded-[18px]
+                    bg-white/[0.07]
+                  "
+                  transition={{
+                    type: "spring",
+                    stiffness: 450,
+                    damping: 32,
+                  }}
+                />
+              )}
+
+              <Icon
+                className={cn(
+                  "relative z-10 h-[18px] w-[18px]",
+                  active
+                    ? "text-accent"
+                    : "text-white/45"
+                )}
+                strokeWidth={active ? 2 : 1.7}
               />
+
+              <span
+                className={cn(
+                  "relative z-10",
+                  active
+                    ? "text-white"
+                    : "text-white/45"
+                )}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+
+        {/* MORE BUTTON */}
+        <button
+          type="button"
+          onClick={() => setMoreOpen((open) => !open)}
+          aria-label="More"
+          aria-expanded={moreOpen}
+          className="
+            relative
+            flex-1
+            h-full
+            flex
+            flex-col
+            items-center
+            justify-center
+            gap-1
+            rounded-[18px]
+            text-[10px]
+            font-medium
+          "
+        >
+          {(moreOpen || moreActive) && (
+            <motion.span
+              layoutId="bottomnav-active"
+              className="
+                absolute
+                inset-x-1
+                inset-y-2
+                rounded-[18px]
+                bg-white/[0.07]
+              "
+              transition={{
+                type: "spring",
+                stiffness: 450,
+                damping: 32,
+              }}
+            />
+          )}
+
+          <MoreHorizontal
+            className={cn(
+              "relative z-10 h-[18px] w-[18px]",
+              moreOpen || moreActive
+                ? "text-accent"
+                : "text-white/45"
             )}
-            <item.icon className={cn("relative z-10 h-5 w-5", active && "text-accent")} aria-hidden="true" />
-            <span className="relative z-10">{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+            strokeWidth={moreOpen ? 2 : 1.7}
+          />
+
+          <span
+            className={cn(
+              "relative z-10",
+              moreOpen || moreActive
+                ? "text-white"
+                : "text-white/45"
+            )}
+          >
+            More
+          </span>
+        </button>
+      </nav>
+    </>
   );
 }

@@ -21,5 +21,5 @@ export const NAV_ITEMS: NavItem[] = [
 
 /** Subset shown in the mobile bottom nav (kept short to feel native) — the 5 core app pages, "Home" is desktop-only. */
 export const MOBILE_NAV_ITEMS: NavItem[] = NAV_ITEMS.filter((item) =>
-  ["/today", "/schedule", "/focus", "/habits", "/goals"].includes(item.href)
+  ["/","/today", "/schedule", "/focus", "/habits", "/goals","/settings"].includes(item.href)
 );
