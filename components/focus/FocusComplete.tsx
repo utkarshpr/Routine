@@ -13,10 +13,10 @@ const BURST_ANGLES = Array.from({ length: 8 }, (_, i) => (i * 360) / 8);
 
 export function FocusComplete({ session, onDone }: { session: FocusSession; onDone: () => void }) {
   return (
-    <div className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-6 py-12">
+    <div className="relative flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden px-4 py-6 sm:px-6 sm:py-10">
       <BackgroundGlow />
 
-      <Card className="relative z-10 w-full max-w-md border-border-strong bg-surface/90 p-8 text-center backdrop-blur-xl">
+      <Card className="relative z-10 w-full max-w-md border-border-strong bg-surface/90 p-6 text-center backdrop-blur-xl sm:p-8">
         <div className="relative mx-auto flex h-16 w-16 items-center justify-center">
           {BURST_ANGLES.map((angle) => (
             <motion.span
@@ -45,7 +45,7 @@ export function FocusComplete({ session, onDone }: { session: FocusSession; onDo
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="mt-5 text-2xl font-semibold tracking-tight"
+          className="mt-5 text-xl font-semibold tracking-tight sm:text-2xl"
         >
           {copy.focusComplete}
         </motion.h1>

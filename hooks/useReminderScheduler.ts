@@ -24,18 +24,19 @@ export function useReminderScheduler() {
 
     for (const task of todayTasks) {
       const routine = task.routineId ? routineById.get(task.routineId) : undefined;
-      if (!routine?.reminder.enabled) continue;
+      const reminder = task.reminder ?? routine?.reminder;
+      if (!reminder?.enabled) continue;
 
-      const fireTime = addMinutesToTime(task.startTime, -routine.reminder.offsetMinutes);
+      const fireTime = addMinutesToTime(task.startTime, -reminder.offsetMinutes);
       const [h, m] = fireTime.split(":").map(Number);
       const fireAt = new Date();
       fireAt.setHours(h, m, 0, 0);
       if (fireAt.getTime() <= Date.now()) continue;
 
       const body =
-        routine.reminder.offsetMinutes === 0
+        reminder.offsetMinutes === 0
           ? `${task.title} starts now`
-          : `${task.title} starts in ${routine.reminder.offsetMinutes} minutes`;
+          : `${task.title} starts in ${reminder.offsetMinutes} minutes`;
 
       scheduleForegroundReminder(task.id, fireAt, "Daily OS", body, (title, message) => toast(message));
     }

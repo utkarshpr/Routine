@@ -18,7 +18,7 @@ export function PillTabs<T extends string>({
   const layoutId = useId();
 
   return (
-    <div className={cn("flex w-fit gap-1 rounded-full bg-surface-2 p-1", className)}>
+    <div className={cn("flex w-fit gap-1 rounded-lg border border-border bg-surface-2 p-1", className)}>
       {tabs.map((tab) => {
         const active = tab === value;
         return (
@@ -27,14 +27,14 @@ export function PillTabs<T extends string>({
             type="button"
             onClick={() => onChange(tab)}
             className={cn(
-              "relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+              "relative rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors",
               active ? "text-foreground" : "text-muted"
             )}
           >
             {active && (
               <motion.span
                 layoutId={`pill-tabs-${layoutId}`}
-                className="absolute inset-0 rounded-full bg-surface shadow-sm"
+                className="absolute inset-0 rounded-md bg-surface shadow-sm"
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
               />
             )}

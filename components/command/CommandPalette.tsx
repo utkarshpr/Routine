@@ -2,15 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { Command } from "cmdk";
 import { Plus, Search as SearchIcon } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
 import { SelectField, TextField } from "@/components/ui/Field";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRoutineStore } from "@/stores/routineStore";
 import { useHabitStore } from "@/stores/habitStore";
 import { useGoalStore } from "@/stores/goalStore";
@@ -18,7 +16,7 @@ import { useReviewStore } from "@/stores/reviewStore";
 import { useTaskStore } from "@/stores/taskStore";
 import { toast } from "@/stores/toastStore";
 import { defaultIconColor, endTimeFor, parseQuickAdd } from "@/lib/nlp";
-import { dayOfWeek, formatTimeLabel, minutesToTime, parseDateKey, todayKey } from "@/lib/dates";
+import { dayOfWeek, formatTimeLabel, minutesToTime, parseDateKey, todayKey, dateKey } from "@/lib/dates";
 import { DAY_LABELS } from "@/lib/constants";
 import { CATEGORIES, type Category, type DayOfWeek } from "@/types";
 
@@ -54,7 +52,6 @@ export function CommandPalette({
   const targetDateLabel = isToday ? "today" : format(parseDateKey(targetDate), "EEE d");
   const [query, setQuery] = useState("");
   const [manualMode, setManualMode] = useState<"search" | "add">(initialMode);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const routines = useRoutineStore((s) => s.routines);
   const addRoutine = useRoutineStore((s) => s.add);
@@ -87,16 +84,25 @@ export function CommandPalette({
   const [formCategory, setFormCategory] = useState<Category>("Other");
   const [formStart, setFormStart] = useState("");
   const [formDuration, setFormDuration] = useState(30);
+  const [manualReminder, setManualReminder] = useState(false);
 
   function switchMode(next: "search" | "add") {
     setQuery("");
     setManualMode(next);
     setTaskScope("single");
     setRepeatMode("weekday");
-    setRepeatDays([dayOfWeek(targetDate)]);
+      setRepeatDays([dayOfWeek(targetDate)]);
+      setManualReminder(false);
   }
 
   const parsed = useMemo(() => parseQuickAdd(query || "+ New task", roundedNow()), [query]);
+  const resolvedDate = useMemo(() => {
+    const lower = query.toLowerCase();
+    if (lower.includes("tomorrow")) return dateKey(addDays(parseDateKey(targetDate), 1));
+    if (lower.includes("today")) return targetDate;
+    return targetDate;
+  }, [query, targetDate]);
+  const resolvedDateLabel = resolvedDate === todayKey() ? "today" : format(parseDateKey(resolvedDate), "EEE d");
 
   function toggleRepeatDay(day: DayOfWeek) {
     setRepeatDays((current) =>
@@ -245,7 +251,7 @@ export function CommandPalette({
     } else {
       await addManualTask({
         routineId: null,
-        date: targetDate,
+        date: resolvedDate,
         title,
         category: formCategory,
         startTime: formStart,
@@ -256,16 +262,17 @@ export function CommandPalette({
         type: "FLEXIBLE",
         status: "pending",
         completionRequired: true,
+        reminder: { enabled: manualReminder, offsetMinutes: 10, sound: true },
       });
-      toast(`Added to ${targetDateLabel}`, "success");
+      toast(`Added to ${resolvedDateLabel}`, "success");
     }
     onClose();
   }
 
   const body = (
     <Command shouldFilter={false} loop className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-        {mode === "add" ? <Plus className="h-4 w-4 text-muted" /> : <SearchIcon className="h-4 w-4 text-muted" />}
+      <div className="flex items-center gap-2 border-b border-border bg-surface-2/45 px-5 py-4">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-surface text-muted">{mode === "add" ? <Plus className="h-4 w-4" /> : <SearchIcon className="h-4 w-4" />}</span>
         <input
           autoFocus
           value={query}
@@ -318,10 +325,8 @@ export function CommandPalette({
           </Command.List>
         )
       ) : (
-        <div className="space-y-3 p-4">
-          <p className="text-xs text-muted">
-            We parsed this as best we could — check the details before adding.
-          </p>
+        <div className="space-y-4 p-5">
+          <div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">New item</p><p className="mt-1 text-sm text-muted">Review the details, then place it in your day.</p></div>
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted">Repeat behavior</p>
             <div className="flex gap-2">
@@ -457,13 +462,17 @@ export function CommandPalette({
                 </option>
               ))}
             </SelectField>
+            <label className="col-span-2 flex items-center justify-between rounded-xl border border-border bg-surface-2 px-3 py-2.5 text-sm">
+              <span><span className="block font-medium">Remind me</span><span className="text-xs text-muted">10 minutes before</span></span>
+              <input type="checkbox" checked={manualReminder} onChange={(e) => setManualReminder(e.target.checked)} className="h-4 w-4 accent-[var(--accent)]" />
+            </label>
           </div>
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex items-center justify-between gap-2 border-t border-border pt-4">
             <Button variant="ghost" onClick={onClose} type="button">
               Cancel
             </Button>
             <Button onClick={handleAdd} type="button">
-              {taskScope === "recurring" ? "Create recurring routine" : `Add to ${targetDateLabel}`}
+              {taskScope === "recurring" ? "Create recurring routine" : `Add to ${resolvedDateLabel}`}
             </Button>
           </div>
         </div>
@@ -471,17 +480,9 @@ export function CommandPalette({
     </Command>
   );
 
-  if (isDesktop) {
-    return (
-      <Modal open={open} onClose={onClose} title="Command palette" className="max-w-xl p-0">
-        {body}
-      </Modal>
-    );
-  }
-
   return (
-    <Drawer open={open} onClose={onClose} title="Command palette">
+    <Modal open={open} onClose={onClose} title="Command palette" className="max-h-[90vh] max-w-xl rounded-[26px] p-0">
       {body}
-    </Drawer>
+    </Modal>
   );
 }

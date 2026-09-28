@@ -5,7 +5,7 @@ import type { Category, DayOfWeek, Goal, Habit, Routine, TaskType } from "@/type
 
 const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6];
 const WEEKDAYS: DayOfWeek[] = [1, 2, 3, 4, 5];
-const DEFAULT_GOAL_ID = "seed-goal-sse-prep";
+const DEFAULT_GOAL_ID = "seed-goal-balanced-week";
 
 interface RoutineBlueprint {
   title: string;
@@ -18,20 +18,20 @@ interface RoutineBlueprint {
   notes?: string;
 }
 
-/** The default section-19 SSE-prep routine, editable after creation. */
+/** A neutral starter routine for people who skip personalization during onboarding. */
 export const DEFAULT_ROUTINE_BLUEPRINT: RoutineBlueprint[] = [
-  { title: "Gym", category: "Gym", startTime: "06:00", endTime: "07:00", daysOfWeek: ALL_DAYS, priority: "high", type: "FLEXIBLE" },
-  { title: "Shower + refresh", category: "Personal", startTime: "07:00", endTime: "07:30", daysOfWeek: ALL_DAYS, priority: "low", type: "FLEXIBLE" },
-  { title: "DSA Deep Work", category: "DSA", startTime: "07:30", endTime: "08:45", daysOfWeek: WEEKDAYS, priority: "high", type: "FIXED" },
-  { title: "Breakfast", category: "Personal", startTime: "08:45", endTime: "09:15", daysOfWeek: ALL_DAYS, priority: "low", type: "FLEXIBLE" },
-  { title: "HLD / LLD", category: "HLD", startTime: "09:15", endTime: "10:00", daysOfWeek: WEEKDAYS, priority: "medium", type: "FIXED" },
-  { title: "Work", category: "Work", startTime: "10:00", endTime: "18:00", daysOfWeek: WEEKDAYS, priority: "high", type: "FIXED", notes: "Deep work + meetings" },
-  { title: "Break / commute / decompress", category: "Personal", startTime: "18:00", endTime: "19:00", daysOfWeek: WEEKDAYS, priority: "low", type: "FLEXIBLE" },
-  { title: "Cooking + dinner", category: "Cooking", startTime: "19:00", endTime: "20:00", daysOfWeek: ALL_DAYS, priority: "medium", type: "FLEXIBLE" },
-  { title: "Golang / project", category: "Golang", startTime: "20:00", endTime: "21:30", daysOfWeek: WEEKDAYS, priority: "high", type: "FLEXIBLE" },
-  { title: "Me time / girlfriend / friends", category: "Relationship", startTime: "21:30", endTime: "22:30", daysOfWeek: ALL_DAYS, priority: "medium", type: "FLEXIBLE" },
-  { title: "Planning + wind down", category: "Personal", startTime: "22:30", endTime: "23:00", daysOfWeek: ALL_DAYS, priority: "low", type: "FLEXIBLE" },
-  { title: "Sleep", category: "Sleep", startTime: "23:00", endTime: "06:00", daysOfWeek: ALL_DAYS, priority: "high", type: "FIXED" },
+  { title: "Morning reset", category: "Personal", startTime: "07:00", endTime: "07:30", daysOfWeek: ALL_DAYS, priority: "medium", type: "FLEXIBLE" },
+  { title: "Move your body", category: "Gym", startTime: "07:30", endTime: "08:15", daysOfWeek: ALL_DAYS, priority: "high", type: "FLEXIBLE" },
+  { title: "Breakfast", category: "Personal", startTime: "08:15", endTime: "08:45", daysOfWeek: ALL_DAYS, priority: "low", type: "FLEXIBLE" },
+  { title: "Focused work", category: "Work", startTime: "09:00", endTime: "12:00", daysOfWeek: WEEKDAYS, priority: "high", type: "FIXED", notes: "One meaningful block before the day gets noisy" },
+  { title: "Lunch + reset", category: "Personal", startTime: "12:00", endTime: "13:00", daysOfWeek: WEEKDAYS, priority: "low", type: "FLEXIBLE" },
+  { title: "Work / study", category: "Work", startTime: "13:00", endTime: "17:00", daysOfWeek: WEEKDAYS, priority: "high", type: "FIXED" },
+  { title: "Transition time", category: "Personal", startTime: "17:00", endTime: "18:00", daysOfWeek: WEEKDAYS, priority: "low", type: "FLEXIBLE" },
+  { title: "Dinner", category: "Cooking", startTime: "18:00", endTime: "19:00", daysOfWeek: ALL_DAYS, priority: "medium", type: "FLEXIBLE" },
+  { title: "Personal project", category: "Personal", startTime: "19:00", endTime: "20:00", daysOfWeek: [1, 2, 3, 4, 5], priority: "medium", type: "FLEXIBLE" },
+  { title: "People + free time", category: "Friends", startTime: "20:00", endTime: "21:30", daysOfWeek: ALL_DAYS, priority: "medium", type: "FLEXIBLE" },
+  { title: "Plan tomorrow", category: "Personal", startTime: "21:30", endTime: "21:45", daysOfWeek: ALL_DAYS, priority: "low", type: "FLEXIBLE" },
+  { title: "Sleep", category: "Sleep", startTime: "22:30", endTime: "07:00", daysOfWeek: ALL_DAYS, priority: "high", type: "FIXED" },
 ];
 
 export function buildRoutinesFromBlueprint(
@@ -67,7 +67,7 @@ export function defaultSeedRoutines(): Routine[] {
   }));
 }
 
-export type OnboardingGoal = "DSA" | "Golang" | "HLD" | "LLD" | "Fitness" | "Personal";
+export type OnboardingGoal = "Work" | "Learning" | "Projects" | "Fitness" | "Personal" | "Recovery";
 
 export interface OnboardingAnswers {
   wakeTime: string;
@@ -87,23 +87,22 @@ interface FlexBlock {
 }
 
 const MORNING_BLOCKS: FlexBlock[] = [
-  { title: "Gym", category: "Gym", minutes: 60, priority: "high", type: "FLEXIBLE", requiresGoal: "Fitness" },
-  { title: "Shower + refresh", category: "Personal", minutes: 30, priority: "low", type: "FLEXIBLE" },
-  { title: "DSA Deep Work", category: "DSA", minutes: 75, priority: "high", type: "FIXED", requiresGoal: "DSA" },
+  { title: "Move your body", category: "Gym", minutes: 45, priority: "high", type: "FLEXIBLE", requiresGoal: "Fitness" },
+  { title: "Morning reset", category: "Personal", minutes: 30, priority: "low", type: "FLEXIBLE" },
+  { title: "Learn / read", category: "Personal", minutes: 60, priority: "high", type: "FIXED", requiresGoal: "Learning" },
   { title: "Breakfast", category: "Personal", minutes: 30, priority: "low", type: "FLEXIBLE" },
-  { title: "HLD / LLD", category: "HLD", minutes: 45, priority: "medium", type: "FIXED", requiresGoal: "HLD" },
 ];
 
 const EVENING_BLOCKS: FlexBlock[] = [
-  { title: "Break / commute / decompress", category: "Personal", minutes: 60, priority: "low", type: "FLEXIBLE" },
-  { title: "Cooking + dinner", category: "Cooking", minutes: 60, priority: "medium", type: "FLEXIBLE" },
-  { title: "Golang / project", category: "Golang", minutes: 90, priority: "high", type: "FLEXIBLE", requiresGoal: "Golang" },
-  { title: "Me time / friends", category: "Relationship", minutes: 60, priority: "medium", type: "FLEXIBLE", requiresGoal: "Personal" },
-  { title: "Planning + wind down", category: "Personal", minutes: 30, priority: "low", type: "FLEXIBLE" },
+  { title: "Transition time", category: "Personal", minutes: 60, priority: "low", type: "FLEXIBLE" },
+  { title: "Dinner", category: "Cooking", minutes: 60, priority: "medium", type: "FLEXIBLE" },
+  { title: "Personal project", category: "Personal", minutes: 60, priority: "high", type: "FLEXIBLE", requiresGoal: "Projects" },
+  { title: "People + free time", category: "Friends", minutes: 60, priority: "medium", type: "FLEXIBLE", requiresGoal: "Personal" },
+  { title: "Plan tomorrow", category: "Personal", minutes: 15, priority: "low", type: "FLEXIBLE" },
 ];
 
 function includesGoal(goals: OnboardingGoal[], block: FlexBlock): boolean {
-  return !block.requiresGoal || goals.includes(block.requiresGoal) || (block.requiresGoal === "HLD" && goals.includes("LLD"));
+  return !block.requiresGoal || goals.includes(block.requiresGoal);
 }
 
 /** Adapts the default routine template to the user's chosen day boundaries and focus areas. */
@@ -121,7 +120,7 @@ export function buildAdaptedRoutineBlueprint(answers: OnboardingAnswers): Routin
       category: block.category,
       startTime: addMinutesToTime("00:00", start),
       endTime: addMinutesToTime("00:00", end),
-      daysOfWeek: block.category === "DSA" || block.category === "HLD" ? [1, 2, 3, 4, 5] : ALL_DAYS,
+      daysOfWeek: block.requiresGoal === "Learning" || block.requiresGoal === "Projects" ? WEEKDAYS : ALL_DAYS,
       priority: block.priority,
       type: block.type,
     });
@@ -173,12 +172,12 @@ export function buildAdaptedRoutineBlueprint(answers: OnboardingAnswers): Routin
 export function defaultSeedHabits(): Habit[] {
   const now = new Date().toISOString();
   const defs: { id: string; title: string; icon: string; color: string }[] = [
-    { id: "seed-habit-gym", title: "Gym", icon: "Dumbbell", color: "#f97316" },
-    { id: "seed-habit-study", title: "Study", icon: "Braces", color: "#0ea5e9" },
-    { id: "seed-habit-read", title: "Read", icon: "Sparkles", color: "#10b981" },
-    { id: "seed-habit-meditate", title: "Meditate", icon: "Moon", color: "#64748b" },
-    { id: "seed-habit-drink-water", title: "Drink Water", icon: "Circle", color: "#0ea5e9" },
-    { id: "seed-habit-sleep-before-11", title: "Sleep before 11", icon: "Moon", color: "#8b5cf6" },
+    { id: "seed-habit-move", title: "Move your body", icon: "Dumbbell", color: "#f97316" },
+    { id: "seed-habit-read", title: "Read or learn", icon: "BookOpen", color: "#0ea5e9" },
+    { id: "seed-habit-reset", title: "Take a real pause", icon: "Sparkles", color: "#10b981" },
+    { id: "seed-habit-reflect", title: "Reflect for five minutes", icon: "Moon", color: "#64748b" },
+    { id: "seed-habit-water", title: "Drink enough water", icon: "Circle", color: "#0ea5e9" },
+    { id: "seed-habit-sleep", title: "Keep a steady bedtime", icon: "Moon", color: "#8b5cf6" },
   ];
   return defs.map((d) => ({
     id: d.id,
@@ -196,16 +195,16 @@ export function defaultSeedGoals(): Goal[] {
   return [
     {
       id: DEFAULT_GOAL_ID,
-      title: "₹1 Cr SSE Preparation",
-      areas: ["DSA", "HLD", "LLD", "Golang", "Work"],
+      title: "Build a balanced week",
+      areas: ["Work", "Gym", "Personal"],
       targetDate: "2026-12-31",
       progress: 15,
       milestones: [
-        { id: "seed-goal-milestone-1", title: "300 DSA problems solved", done: false },
-        { id: "seed-goal-milestone-2", title: "20 HLD designs practiced", done: false },
-        { id: "seed-goal-milestone-3", title: "10 LLD designs practiced", done: false },
-        { id: "seed-goal-milestone-4", title: "Ship 2 Golang projects", done: false },
-        { id: "seed-goal-milestone-5", title: "Mock interviews x10", done: false },
+        { id: "seed-goal-milestone-1", title: "Choose three meaningful priorities", done: false },
+        { id: "seed-goal-milestone-2", title: "Protect time for deep work", done: false },
+        { id: "seed-goal-milestone-3", title: "Move on most days", done: false },
+        { id: "seed-goal-milestone-4", title: "Leave space for people and rest", done: false },
+        { id: "seed-goal-milestone-5", title: "Review the week honestly", done: false },
       ],
       notes: "",
       createdAt: now,

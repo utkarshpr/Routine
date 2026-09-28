@@ -23,14 +23,14 @@ export function EmptyState({
       initial="initial"
       animate="animate"
       variants={fadeIn}
-      className={cn("flex flex-col items-center justify-center gap-2 py-12 text-center", className)}
+      className={cn("flex flex-col items-center justify-center gap-2 py-10 text-center", className)}
     >
       {Icon && (
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-surface-2"
+          className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface-2"
         >
           <Icon className="h-5 w-5 text-muted" aria-hidden="true" />
         </motion.div>

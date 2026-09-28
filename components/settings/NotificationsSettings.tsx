@@ -12,7 +12,7 @@ import { toast } from "@/stores/toastStore";
 const STATUS_COPY: Record<NotificationSupport, string> = {
   unsupported: "Not supported in this browser.",
   denied: "Blocked — enable notifications for this site in your browser settings.",
-  granted: "Enabled while Daily OS is open.",
+  granted: "Enabled while Routine is open.",
   default: "Not yet enabled.",
 };
 
@@ -34,7 +34,7 @@ export function NotificationsSettings() {
   return (
     <SettingsSection
       title="Notifications"
-      description="Reminders fire while Daily OS is open in a tab. Browsers don't reliably deliver alerts once the app is closed or the tab is backgrounded for long — that requires a push server, which isn't part of this offline-first v1."
+      description="Reminders fire while Routine is open in a tab. Browsers don't reliably deliver alerts once the app is closed or the tab is backgrounded for long — that requires a push server, which isn't part of this offline-first v1."
     >
       <SettingsRow label="Browser permission">
         <div className="flex items-center gap-2">

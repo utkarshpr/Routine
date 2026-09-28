@@ -15,7 +15,7 @@ export function ProgressBar({
   const clamped = Math.max(0, Math.min(100, value));
   return (
     <div
-      className={cn("h-2 w-full overflow-hidden rounded-full bg-surface-2", trackClassName)}
+      className={cn("h-1.5 w-full overflow-hidden rounded-full bg-surface-2", trackClassName)}
       role="progressbar"
       aria-valuenow={Math.round(clamped)}
       aria-valuemin={0}
@@ -25,7 +25,7 @@ export function ProgressBar({
         className={cn("h-full rounded-full bg-accent", className)}
         initial={{ width: 0 }}
         animate={{ width: `${clamped}%` }}
-        transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          transition={{ type: "spring", stiffness: 150, damping: 24 }}
       />
     </div>
   );

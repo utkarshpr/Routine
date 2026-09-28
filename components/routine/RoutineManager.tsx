@@ -10,7 +10,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Plus, Trash2 } from "lucide-react";
+import { Clock3, PauseCircle, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -21,6 +21,7 @@ import { useTaskStore } from "@/stores/taskStore";
 import { toast } from "@/stores/toastStore";
 import { todayKey } from "@/lib/dates";
 import type { Routine } from "@/types";
+import { buildAdaptedRoutineBlueprint, buildRoutinesFromBlueprint, type OnboardingGoal } from "@/lib/seed";
 
 export function RoutineManager() {
   const routines = useRoutineStore((s) => s.routines);
@@ -30,6 +31,7 @@ export function RoutineManager() {
   const togglePause = useRoutineStore((s) => s.togglePause);
   const remove = useRoutineStore((s) => s.remove);
   const removeFutureByRoutineId = useTaskStore((s) => s.removeFutureByRoutineId);
+  const seed = useRoutineStore((s) => s.seed);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Routine | undefined>(undefined);
@@ -51,15 +53,30 @@ export function RoutineManager() {
     reorder(next);
   }
 
+  const activeCount = sorted.filter((routine) => !routine.paused).length;
+
+  async function switchPreset(kind: "balanced" | "focus" | "recovery") {
+    const goals: OnboardingGoal[] = kind === "focus" ? ["Work", "Learning", "Projects"] : kind === "recovery" ? ["Personal", "Recovery", "Fitness"] : ["Work", "Fitness", "Personal"];
+    await clearAll();
+    await seed(buildRoutinesFromBlueprint(buildAdaptedRoutineBlueprint({ wakeTime: "06:00", workStart: "10:00", workEnd: "18:00", sleepTime: "23:00", goals })));
+    toast(`${kind === "focus" ? "Deep focus" : kind === "recovery" ? "Gentle pace" : "Balanced"} preset active`, "success");
+  }
+
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight">Routines</h2>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="cred-label text-muted">Repeatable structure</p>
+          <div className="mt-1 flex items-center gap-3">
+            <h2 className="text-xl font-semibold tracking-[-0.045em]">Routines</h2>
+            <span className="text-xs text-muted">{activeCount} active · {sorted.length - activeCount} paused</span>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           {sorted.length > 0 && (
             <Button variant="danger" size="sm" onClick={() => setClearAllOpen(true)} type="button">
-              <Trash2 className="h-4 w-4" aria-hidden="true" />
-              Clear all
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Clear
             </Button>
           )}
           <Button
@@ -70,11 +87,29 @@ export function RoutineManager() {
             }}
             type="button"
           >
-            <Plus className="h-4 w-4" aria-hidden="true" />
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             New routine
           </Button>
         </div>
       </div>
+
+      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
+        <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">Switch preset</span>
+        {([["balanced", "Balanced"], ["focus", "Deep focus"], ["recovery", "Gentle pace"]] as const).map(([kind, label]) => <Button key={kind} variant="secondary" size="sm" onClick={() => switchPreset(kind)} type="button">{label}</Button>)}
+      </div>
+
+      {sorted.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 sm:max-w-sm">
+          <div className="flex items-center gap-2 border-y border-border py-2 text-xs">
+            <Clock3 className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+            <span><strong>{sorted.length}</strong> <span className="text-muted">blocks</span></span>
+          </div>
+          <div className="flex items-center gap-2 border-y border-border py-2 text-xs">
+            <PauseCircle className="h-3.5 w-3.5 text-muted" aria-hidden="true" />
+            <span><strong>{activeCount}</strong> <span className="text-muted">in rhythm</span></span>
+          </div>
+        </div>
+      )}
 
       {sorted.length === 0 ? (
         <EmptyState title="No routines yet" description="Add your first block of the day." />

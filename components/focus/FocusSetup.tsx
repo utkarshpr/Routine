@@ -36,25 +36,28 @@ export function FocusSetup({
   const meta = CATEGORY_META[category];
 
   return (
-    <div className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-6 py-12">
+    <div className="relative flex min-h-[calc(100vh-8rem)] items-start justify-center overflow-hidden px-4 py-5 sm:items-center sm:px-6 sm:py-10">
       <BackgroundGlow />
 
-      <Card className="relative z-10 w-full max-w-md border-border-strong bg-surface/90 p-8 text-center backdrop-blur-xl">
+      <Card className="relative z-10 w-full max-w-2xl border-border-strong bg-[#111212] p-5 backdrop-blur-xl sm:p-7">
+        <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(220px,0.8fr)] sm:items-center sm:gap-8">
+        <div className="text-center sm:text-left">
         <motion.div
           key={category}
           initial={{ scale: 0.7, opacity: 0, rotate: -8 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 18 }}
-          className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl shadow-[var(--shadow-pop)]"
+          className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl shadow-[var(--shadow-pop)] sm:mx-0"
           style={{ backgroundColor: `${meta.color}22`, color: meta.color }}
         >
           <CategoryIcon category={category} className="h-6 w-6" />
         </motion.div>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="cred-label mt-4 text-muted">Focus mode</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.055em] sm:text-3xl">{title}</h1>
         <p className="mt-1 text-sm text-muted">{copy.focusStart}</p>
 
         {!task && (
-          <div className="mt-6 text-left">
+          <div className="mt-5 text-left">
             <Label htmlFor="focus-category">Category</Label>
             <SelectField id="focus-category" value={category} onChange={(e) => setCategory(e.target.value as Category)}>
               {CATEGORIES.map((c) => (
@@ -66,7 +69,10 @@ export function FocusSetup({
           </div>
         )}
 
-        <div className="mt-6 grid grid-cols-2 gap-1.5 rounded-2xl bg-surface-2 p-2">
+        </div>
+
+        <div className="sm:border-l sm:border-border sm:pl-7">
+        <div className="grid grid-cols-2 gap-1.5 rounded-xl border border-border bg-black/20 p-1.5">
           {MODES.map((m) => (
             <motion.button
               key={m}
@@ -75,7 +81,7 @@ export function FocusSetup({
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               className={cn(
-                "rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                "rounded-lg px-2 py-2.5 text-xs font-medium transition-colors sm:text-sm",
                 mode === m ? "bg-accent text-accent-foreground shadow-[var(--shadow-card)]" : "text-foreground hover:bg-border/40"
               )}
             >
@@ -85,7 +91,7 @@ export function FocusSetup({
         </div>
 
         {mode === "custom" && (
-          <div className="mt-4 text-left">
+          <div className="mt-3 text-left">
             <Label htmlFor="focus-duration">Duration (minutes)</Label>
             <SelectField
               id="focus-duration"
@@ -103,12 +109,14 @@ export function FocusSetup({
 
         <Button
           size="lg"
-          className="mt-8 w-full"
+          className="mt-5 w-full"
           onClick={() => onStart({ title, category, mode, plannedSeconds: durationMinutes * 60 })}
           type="button"
         >
           Start Session
         </Button>
+        </div>
+        </div>
       </Card>
     </div>
   );

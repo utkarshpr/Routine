@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Plus, WifiOff } from "lucide-react";
 import { pageVariants } from "@/lib/motion";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { InstallPrompt } from "@/components/layout/InstallPrompt";
 import { Toaster } from "@/components/ui/Toaster";
@@ -73,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-pulse rounded-full bg-accent/30" aria-hidden="true" />
-          <p className="text-sm text-muted">Loading Daily OS…</p>
+          <p className="text-sm text-muted">Loading Routine…</p>
         </div>
       </div>
     );
@@ -88,12 +89,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="relative flex min-h-screen overflow-x-hidden">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[220px] bg-[linear-gradient(180deg,rgba(255,255,255,0.045),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[180px] bg-[radial-gradient(ellipse_at_70%_-30%,rgba(185,151,80,0.12),transparent_58%)]"
       />
       <Sidebar onOpenCommandPalette={() => openCommandPalette("search")} />
       <div className="relative flex min-h-screen min-w-0 flex-1 flex-col">
+        <TopBar />
         {!online && (
-          <div className="mx-4 mt-4 flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-xs text-muted shadow-[var(--shadow-card)] backdrop-blur-md md:mx-6">
+          <div className="mx-4 mt-3 flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-xs text-muted md:mx-6">
             <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
             You&rsquo;re offline — changes are saved locally and stay put.
           </div>
@@ -122,7 +124,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.94 }}
           transition={{ type: "spring", stiffness: 500, damping: 25 }}
-          className="fixed bottom-22 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-border bg-accent text-accent-foreground shadow-[var(--shadow-pop)] md:bottom-8 md:right-8"
+          className="fixed bottom-7 right-7 z-40 hidden h-12 w-12 items-center justify-center rounded-full border border-accent bg-accent text-accent-foreground shadow-[var(--shadow-pop)] md:flex"
         >
           <Plus className="h-6 w-6" aria-hidden="true" />
         </motion.button>
@@ -142,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Modal open={shouldPromptForName} onClose={() => undefined} title="Tell us your name" className="max-w-md">
         <h2 className="text-xl font-semibold tracking-tight">Make it yours</h2>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Start with a blank workspace and add your name once, so Daily OS feels personal from the beginning.
+          Start with a blank workspace and add your name once, so Routine feels personal from the beginning.
         </p>
         <div className="mt-5">
           <Label htmlFor="first-run-name">Your name</Label>

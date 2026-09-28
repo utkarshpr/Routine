@@ -55,8 +55,8 @@ export function DayColumn({ date, label, tasks }: { date: Date; label: string; t
     <div
       ref={setNodeRef}
       className={cn(
-        "group/col flex min-h-[200px] flex-col gap-2 rounded-2xl border p-2.5 transition-colors",
-        isToday ? "border-accent/30 bg-accent/5" : "border-border bg-surface",
+      "group/col flex min-h-[180px] flex-col gap-0 border-t border-border p-1.5 pt-3 transition-colors sm:rounded-lg sm:border sm:p-2.5",
+        isToday ? "border-accent/30 bg-accent/[0.025]" : "border-border/80 bg-surface/35",
         isOver && "ring-2 ring-accent/50"
       )}
     >
@@ -66,7 +66,7 @@ export function DayColumn({ date, label, tasks }: { date: Date; label: string; t
             <p className={cn("text-xs font-semibold", isToday && "text-accent")}>{label}</p>
             {isToday && <Badge className="px-1.5 py-0 text-[9px]">Today</Badge>}
           </div>
-          <p className="text-[11px] text-muted">
+          <p className="text-[11px] text-muted tabular-nums">
             {date.getDate()}
             {totalCount > 0 && ` · ${completedCount}/${totalCount}`}
           </p>
@@ -98,10 +98,10 @@ export function DayColumn({ date, label, tasks }: { date: Date; label: string; t
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-1.5">
+      <div className="flex flex-1 flex-col gap-0">
         {sorted.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 px-1 py-4 text-center">
-            <p className="text-[11px] text-muted">Nothing scheduled</p>
+            <p className="text-[11px] text-muted">Nothing planned</p>
             <button
               type="button"
               onClick={() => openCommandPalette("add", key)}

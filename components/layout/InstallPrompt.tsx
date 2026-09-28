@@ -65,7 +65,7 @@ export function InstallPrompt() {
         >
           <X className="h-4 w-4" />
         </button>
-        <p className="pr-6 text-sm font-medium">Install Daily OS</p>
+        <p className="pr-6 text-sm font-medium">Install Routine</p>
         {deferredEvent ? (
           <>
             <p className="mt-1 text-xs text-muted">Add it to your home screen for a native, offline-ready experience.</p>

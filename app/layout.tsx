@@ -6,12 +6,12 @@ import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Daily OS",
-  description: "Build your day. A calm, offline-first operating system for your work, health, learning and life.",
+  title: "Routine",
+  description: "Make time count. A focused offline-first operating system for your day.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Daily OS",
+    title: "Routine",
   },
   icons: {
     icon: [

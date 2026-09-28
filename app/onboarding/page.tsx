@@ -8,19 +8,17 @@ import { Button } from "@/components/ui/Button";
 import { Label, TextField } from "@/components/ui/Field";
 import { Card } from "@/components/ui/Card";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
-import { AnimatedGradientText } from "@/components/ui/effects/AnimatedGradientText";
-import { BackgroundGlow } from "@/components/ui/BackgroundGlow";
 import { durationMinutes, formatDurationLabel, formatTimeLabel } from "@/lib/dates";
-import { ACCENT_COLORS, CATEGORY_META } from "@/lib/constants";
+import { CATEGORY_META } from "@/lib/constants";
 import { buildAdaptedRoutineBlueprint, buildRoutinesFromBlueprint, defaultSeedRoutines, type OnboardingGoal } from "@/lib/seed";
 import { useRoutineStore } from "@/stores/routineStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { pageVariants } from "@/lib/motion";
-import { copy } from "@/lib/copy";
 import { cn } from "@/lib/cn";
-import type { AppearanceMode, Category, Routine } from "@/types";
+import type { Category, Routine } from "@/types";
 
 type Step = "intro" | "times" | "goals" | "preview";
+type RoutineTemplate = "balanced" | "focus" | "recovery";
 
 const STEPS: Step[] = ["intro", "times", "goals", "preview"];
 
@@ -32,12 +30,12 @@ const STEP_ICON: Record<Step, typeof Sparkles> = {
 };
 
 const GOAL_OPTIONS: { value: OnboardingGoal; label: string; category: Category }[] = [
-  { value: "DSA", label: "DSA", category: "DSA" },
-  { value: "Golang", label: "Golang", category: "Golang" },
-  { value: "HLD", label: "HLD", category: "HLD" },
-  { value: "LLD", label: "LLD", category: "LLD" },
+  { value: "Work", label: "Work", category: "Work" },
+  { value: "Learning", label: "Learning", category: "Personal" },
+  { value: "Projects", label: "Personal projects", category: "Personal" },
   { value: "Fitness", label: "Fitness", category: "Gym" },
   { value: "Personal", label: "Personal time", category: "Personal" },
+  { value: "Recovery", label: "Rest + recovery", category: "Sleep" },
 ];
 
 function StepDots({ step }: { step: Step }) {
@@ -66,13 +64,12 @@ export default function OnboardingPage() {
 
   const [step, setStep] = useState<Step>("intro");
   const [name, setName] = useState(settings.userName);
-  const [appearance, setAppearance] = useState<AppearanceMode>(settings.appearance);
-  const [accentColor, setAccentColor] = useState(settings.accentColor);
   const [wakeTime, setWakeTime] = useState("06:00");
   const [workStart, setWorkStart] = useState("10:00");
   const [workEnd, setWorkEnd] = useState("18:00");
   const [sleepTime, setSleepTime] = useState("23:00");
-  const [goals, setGoals] = useState<OnboardingGoal[]>(["DSA", "Golang", "HLD", "Fitness"]);
+  const [goals, setGoals] = useState<OnboardingGoal[]>(["Work", "Fitness", "Personal"]);
+  const [template, setTemplate] = useState<RoutineTemplate>("balanced");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const blueprint = useMemo(
@@ -95,8 +92,6 @@ export default function OnboardingPage() {
     await updateSettings({
       userName: name.trim(),
       hasOnboarded: true,
-      appearance,
-      accentColor,
       startOfDay: wakeTime,
       defaultWorkStart: workStart,
       defaultWorkEnd: workEnd,
@@ -107,11 +102,11 @@ export default function OnboardingPage() {
   const StepIcon = STEP_ICON[step];
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-12">
-      <BackgroundGlow />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-6 sm:px-6 sm:py-10">
+      <div aria-hidden="true" className="cred-grid pointer-events-none absolute inset-0 opacity-30" />
 
-      <div className="relative z-10 w-full max-w-lg">
-        <Card className="border-border-strong bg-surface/90 p-8 backdrop-blur-xl">
+      <div className="relative z-10 w-full max-w-xl">
+        <Card className="border-border-strong bg-[#111212] p-5 backdrop-blur-xl sm:p-8">
           {step !== "intro" && <StepDots step={step} />}
 
           <motion.div key={step} variants={pageVariants} initial="initial" animate="animate" exit="exit">
@@ -121,14 +116,13 @@ export default function OnboardingPage() {
                   initial={{ scale: 0.7, opacity: 0, rotate: -8 }}
                   animate={{ scale: 1, opacity: 1, rotate: 0 }}
                   transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                  className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-[var(--shadow-pop)]"
+                  className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-[var(--shadow-pop)]"
                 >
                   <StepIcon className="h-6 w-6" aria-hidden="true" />
                 </motion.div>
-                <h1 className="mt-5 text-4xl font-semibold tracking-tight">
-                  <AnimatedGradientText>{copy.tagline}</AnimatedGradientText>
-                </h1>
-                <p className="mt-3 text-base text-muted">{copy.subtitle}</p>
+                <p className="cred-label mt-6 text-muted">Welcome to Routine</p>
+                <h1 className="cred-display mt-3 text-4xl sm:text-5xl">EARN YOUR DAY.</h1>
+                <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-muted sm:text-base sm:leading-7">A space for the things you want to make real — one honest block at a time.</p>
                 <div className="mt-8 space-y-5 text-left">
                   <div>
                     <Label htmlFor="onboarding-name">Your name</Label>
@@ -139,45 +133,9 @@ export default function OnboardingPage() {
                       placeholder="Enter your name"
                     />
                   </div>
-                  <div>
-                    <p className="mb-1.5 block text-xs font-medium text-muted">Theme</p>
-                    <div className="flex flex-wrap gap-2">
-                      {(["system", "light", "dark"] as AppearanceMode[]).map((mode) => (
-                        <button
-                          key={mode}
-                          type="button"
-                          onClick={() => setAppearance(mode)}
-                          className={cn(
-                            "rounded-full border px-3 py-2 text-sm font-medium transition-colors",
-                            appearance === mode ? "border-accent bg-accent/10 text-accent" : "border-border bg-surface-2 text-muted"
-                          )}
-                        >
-                          {mode[0].toUpperCase() + mode.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="mb-1.5 block text-xs font-medium text-muted">Accent</p>
-                    <div className="flex flex-wrap gap-2">
-                      {ACCENT_COLORS.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => setAccentColor(color)}
-                          aria-label={color}
-                          className={cn(
-                            "h-7 w-7 rounded-full border-2 transition-transform hover:scale-105",
-                            accentColor === color ? "border-foreground" : "border-transparent"
-                          )}
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
-                    </div>
-                  </div>
                 </div>
                 <Button size="lg" className="mt-8" onClick={() => setStep("times")} type="button">
-                  Build My Routine
+                  Build my ritual
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
                 <button
@@ -194,7 +152,7 @@ export default function OnboardingPage() {
             {step === "times" && (
               <div>
                 <StepHeading icon={StepIcon} title="A few times to anchor your day." subtitle="You can change every block later." />
-                <div className="mt-6 grid grid-cols-2 gap-4">
+                <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                   <div>
                     <Label htmlFor="wake">Wake-up time</Label>
                     <TextField id="wake" type="time" value={wakeTime} onChange={(e) => setWakeTime(e.target.value)} />
@@ -221,8 +179,11 @@ export default function OnboardingPage() {
 
             {step === "goals" && (
               <div>
-                <StepHeading icon={StepIcon} title="What are you focusing on?" subtitle="Pick what matters right now — you can change this anytime." />
-                <div className="mt-6 grid grid-cols-2 gap-2.5">
+                <StepHeading icon={StepIcon} title="What should your days make room for?" subtitle="Pick what matters right now — you can change this anytime." />
+                <div className="mt-6 grid grid-cols-3 gap-2" aria-label="Routine templates">
+                  {([['balanced', 'Balanced'], ['focus', 'Deep focus'], ['recovery', 'Gentle pace']] as const).map(([value, label]) => <button key={value} type="button" onClick={() => { setTemplate(value); setGoals(value === "focus" ? ["Work", "Learning", "Projects"] : value === "recovery" ? ["Personal", "Recovery", "Fitness"] : ["Work", "Fitness", "Personal"]); }} className={cn("rounded-xl border px-2 py-2.5 text-xs font-semibold transition-colors", template === value ? "border-accent bg-accent/10 text-accent" : "border-border bg-surface-2 text-muted hover:text-foreground")}>{label}</button>)}
+                </div>
+                <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   {GOAL_OPTIONS.map((option) => {
                     const active = goals.includes(option.value);
                     const meta = CATEGORY_META[option.category];
@@ -257,7 +218,7 @@ export default function OnboardingPage() {
             {step === "preview" && (
               <div>
                 <StepHeading icon={StepIcon} title="Your suggested day." subtitle="Fully editable — nothing is locked in." />
-                <Card className="mt-6 max-h-80 overflow-y-auto border-border bg-surface-2/50 p-2 shadow-none">
+                <Card className="mt-6 max-h-[55vh] overflow-y-auto border-border bg-surface-2/50 p-2 shadow-none">
                   <ul className="divide-y divide-border">
                     {blueprint.map((b, i) => (
                       <motion.li
@@ -304,7 +265,7 @@ export default function OnboardingPage() {
           </motion.div>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }
 

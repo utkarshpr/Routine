@@ -1,29 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Check } from "lucide-react";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 
-export function ProgressSection({
-  progressPct,
-  completedCount,
-  totalCount,
-}: {
-  progressPct: number;
-  completedCount: number;
-  totalCount: number;
-}) {
+export function ProgressSection({ progressPct, completedCount, totalCount }: { progressPct: number; completedCount: number; totalCount: number }) {
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="flex items-center justify-between pb-2">
-        <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">Completion</p>
-          <CardTitle className="mt-2 text-xl tracking-[-0.03em]">Today&rsquo;s Progress</CardTitle>
-        </div>
-        <span className="rounded-full border border-white/45 bg-white/55 px-3 py-1 text-sm font-medium text-muted dark:border-white/10 dark:bg-white/6">
-          {completedCount}/{totalCount}
-        </span>
-      </CardHeader>
-      <CardContent>
-        <ProgressBar value={progressPct} trackClassName="h-2.5 bg-white/60 dark:bg-white/8" className="bg-[linear-gradient(90deg,color-mix(in_srgb,var(--accent)_82%,white),var(--accent))]" />
-      </CardContent>
-    </Card>
+    <section className="px-4 py-4" aria-label="Today's progress">
+      <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">Daily progress</p><p className="mt-1 text-2xl font-semibold tracking-[-0.05em]">{progressPct}%</p></div><div className="flex items-center gap-1.5 text-xs text-muted"><Check className="h-3.5 w-3.5 text-success" aria-hidden="true" />{completedCount}/{totalCount} done</div></div>
+      <ProgressBar value={progressPct} trackClassName="mt-3 h-1.5 bg-surface-2" className="bg-success" />
+    </section>
   );
 }

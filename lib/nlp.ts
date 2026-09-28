@@ -34,7 +34,7 @@ function guessCategory(text: string): Category {
   return "Other";
 }
 
-const DURATION_RE = /(\d+(?:\.\d+)?)\s*(hour|hr|h|minute|min|m)\b/i;
+const DURATION_RE = /(\d+(?:\.\d+)?)\s*(hours?|hrs?|h|minutes?|mins?|m)\b/i;
 const TIME_RE = /(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i;
 const TIME_24_RE = /\b([01]?\d|2[0-3]):([0-5]\d)\b/;
 
@@ -76,6 +76,7 @@ export function parseQuickAdd(input: string, defaultStartTime: string): ParsedQu
   const { time, cleaned: afterTime } = extractTime(afterDuration);
 
   const title = afterTime
+    .replace(/\b(today|tomorrow)\b/gi, " ")
     .replace(/\bfor\b|\bat\b/gi, " ")
     .replace(/\s+/g, " ")
     .trim() || raw;

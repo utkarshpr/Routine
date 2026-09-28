@@ -1,6 +1,6 @@
 export const copy = {
   greetingSuffix: "",
-  tagline: "Build your day.",
+  tagline: "Earn your day.",
   subtitle: "One calm place for your work, health, learning and life.",
   oneThingAtATime: "One thing at a time.",
   onTrack: "You're on track.",

@@ -25,7 +25,7 @@ export function applyTheme(mode: AppearanceMode): void {
 export const themeInitScript = `
 (function () {
   try {
-    var stored = localStorage.getItem('${THEME_STORAGE_KEY}') || 'system';
+    var stored = localStorage.getItem('${THEME_STORAGE_KEY}') || 'light';
     var isDark = stored === 'dark' || (stored === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.classList.toggle('dark', isDark);
   } catch (e) {}

@@ -28,27 +28,27 @@ export function RoutineListItem({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-center gap-2 rounded-2xl border border-border bg-surface p-3"
+      className="group flex items-center gap-2 rounded-xl border border-border bg-surface/80 p-2.5 transition-colors hover:border-border-strong sm:p-3"
     >
       <button
         type="button"
         {...attributes}
         {...listeners}
         aria-label="Drag to reorder"
-        className="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center text-muted active:cursor-grabbing"
+        className="flex h-9 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted/70 hover:bg-surface-2 hover:text-foreground active:cursor-grabbing sm:w-8"
       >
         <GripVertical className="h-4 w-4" aria-hidden="true" />
       </button>
 
       <div
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
         style={{ backgroundColor: `${routine.color}1f`, color: routine.color }}
       >
         <CategoryIcon iconName={routine.icon} className="h-4 w-4" />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm font-medium ${routine.paused ? "text-muted" : ""}`}>{routine.title}</p>
+        <p className={`truncate text-[13px] font-medium ${routine.paused ? "text-muted" : ""}`}>{routine.title}</p>
         <p className="truncate text-xs text-muted">
           {formatTimeLabel(routine.startTime)}–{formatTimeLabel(routine.endTime)} ·{" "}
           {routine.recurring ? routine.daysOfWeek.map((d) => DAY_LABELS[d]).join(" ") : "One-time"}
@@ -57,7 +57,7 @@ export function RoutineListItem({
 
       {routine.paused && <Badge>Paused</Badge>}
 
-      <div className="flex shrink-0 items-center gap-0.5">
+      <div className="flex shrink-0 items-center gap-0.5 opacity-70 transition-opacity group-hover:opacity-100">
         <button
           type="button"
           onClick={onTogglePause}

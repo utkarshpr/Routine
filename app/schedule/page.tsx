@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { WeeklyPlanner } from "@/components/schedule/WeeklyPlanner";
@@ -16,15 +15,9 @@ export default function SchedulePage() {
   const searchParams = useSearchParams();
   const activeTabFromUrl = searchParams.get("tab") === "routines" ? "Routines" : "Week";
   const focusedDate = searchParams.get("date") ?? undefined;
-  const initialTab = activeTabFromUrl;
-  const [tab, setTab] = useState<(typeof TABS)[number]>(initialTab);
-
-  useEffect(() => {
-    setTab(activeTabFromUrl);
-  }, [activeTabFromUrl]);
+  const tab = activeTabFromUrl;
 
   function handleTabChange(nextTab: (typeof TABS)[number]) {
-    setTab(nextTab);
     const params = new URLSearchParams(searchParams.toString());
     if (nextTab === "Routines") params.set("tab", "routines");
     else params.delete("tab");
@@ -33,8 +26,14 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-6 md:px-8 md:py-10">
-      <PillTabs tabs={TABS} value={tab} onChange={handleTabChange} />
+    <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-4 md:px-8 md:py-7">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+        <div>
+          <p className="cred-label text-muted">Time architecture</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.05em] sm:text-3xl">Arrange the week.</h1>
+        </div>
+        <PillTabs tabs={TABS} value={tab} onChange={handleTabChange} />
+      </header>
 
       <AnimatePresence mode="wait">
         <motion.div key={tab} initial="initial" animate="animate" exit="exit" variants={fadeIn}>

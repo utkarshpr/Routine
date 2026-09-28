@@ -44,23 +44,5 @@ export const ACCENT_COLORS = [
   "#ec4899",
 ];
 
-export const EXTERNAL_TOOLS = [
-  {
-    id: "dsa-tracker",
-    name: "DSA Tracker",
-    description: "Track problems solved and patterns learned.",
-    url: "https://dsa-tracker-wine.vercel.app/dsa",
-  },
-  {
-    id: "system-design",
-    name: "System Design",
-    description: "HLD/LLD notes and design practice.",
-    url: "https://system-desgin-mu.vercel.app/",
-  },
-  {
-    id: "daily-pulse",
-    name: "Daily Pulse",
-    description: "Your broader daily check-in log.",
-    url: "https://daily-pulse-gtat.vercel.app/",
-  },
-] as const;
+/** Optional integrations stay empty until the user adds their own links. */
+export const EXTERNAL_TOOLS = [] as const;

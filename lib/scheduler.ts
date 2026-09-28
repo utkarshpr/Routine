@@ -35,6 +35,7 @@ export function materializeTasksForDate(
       order: r.order,
       createdAt: now,
       updatedAt: now,
+      reminder: r.reminder,
     }));
 }
 
@@ -104,7 +105,8 @@ export function findConflicts(tasks: Task[]): ConflictGroup[] {
 
   for (const task of sorted) {
     const start = timeToMinutes(task.startTime);
-    const end = timeToMinutes(task.endTime);
+    const rawEnd = timeToMinutes(task.endTime);
+    const end = rawEnd <= start ? rawEnd + 1440 : rawEnd;
     if (currentGroup.length > 0 && start < groupEnd) {
       currentGroup.push(task);
       groupEnd = Math.max(groupEnd, end);
@@ -196,13 +198,38 @@ export function cascadeForward(dayTasks: Task[], fromTaskId: string): Task[] {
 }
 
 export function autoResolveConflicts(dayTasks: Task[]): Task[] {
-  const sorted = sortByStart(dayTasks);
-  let result = sorted;
-  for (const group of findConflicts(sorted)) {
-    const anchor = sortByStart(result.filter((t) => group.taskIds.includes(t.id)))[0];
-    result = cascadeForward(result, anchor.id);
+  let result = sortByStart(dayTasks);
+  // Resolve one overlap at a time. If a fixed block is involved, move the
+  // flexible block away from it instead of silently leaving the conflict.
+  for (let pass = 0; pass < result.length * 2; pass++) {
+    let changed = false;
+    const sorted = sortByStart(result);
+    for (let i = 1; i < sorted.length; i++) {
+      const previous = sorted[i - 1];
+      const current = sorted[i];
+      const previousEnd = timeToMinutes(previous.endTime) <= timeToMinutes(previous.startTime)
+        ? timeToMinutes(previous.endTime) + 1440
+        : timeToMinutes(previous.endTime);
+      const currentStart = timeToMinutes(current.startTime);
+      if (currentStart >= previousEnd) continue;
+
+      if (current.type !== "FIXED") {
+        result = cascadeForward(sorted, previous.id);
+      } else if (previous.type !== "FIXED") {
+        const duration = durationMinutes(previous.startTime, previous.endTime);
+        const newStart = Math.max(0, currentStart - duration);
+        result = sorted.map((task) => task.id === previous.id
+          ? { ...task, startTime: minutesToTime(newStart), endTime: minutesToTime(newStart + duration) }
+          : task);
+      } else {
+        continue;
+      }
+      changed = true;
+      break;
+    }
+    if (!changed) break;
   }
-  return result;
+  return sortByStart(result);
 }
 
 const QUICK_MOVE_OPTIONS = [15, 30, 60] as const;

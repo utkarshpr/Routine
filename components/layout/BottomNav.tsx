@@ -10,11 +10,14 @@ import {
   CircleDot,
   CheckSquare,
   MoreHorizontal,
+  Plus,
   Target,
   Settings,
   House,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useUIStore } from "@/stores/uiStore";
 
 const MOBILE_NAV_ITEMS = [
   {
@@ -42,6 +45,11 @@ const MOBILE_NAV_ITEMS = [
 
 const MORE_ITEMS = [
   {
+    label: "Review",
+    href: "/review",
+    icon: Sparkles,
+  },
+  {
     label: "Habits",
     href: "/habits",
     icon: CheckSquare,
@@ -62,6 +70,7 @@ const MORE_ITEMS = [
 export function BottomNav() {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
+  const openCommandPalette = useUIStore((s) => s.openCommandPalette);
 
   const moreActive = MORE_ITEMS.some(
     (item) =>
@@ -103,15 +112,26 @@ export function BottomNav() {
                 z-50
                 w-48
                 overflow-hidden
-                rounded-2xl
-                border border-white/[0.08]
-                bg-[#15171c]/95
+                rounded-xl
+                border border-white/[0.12]
+                bg-[#141514]/95
                 p-1.5
                 shadow-[0_20px_50px_rgba(0,0,0,0.4)]
                 backdrop-blur-2xl
                 md:hidden
               "
             >
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false);
+                  openCommandPalette("add");
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm text-white/70 transition-colors hover:bg-white/[0.05] hover:text-white"
+              >
+                <Plus className="h-[18px] w-[18px]" />
+                <span>Quick add</span>
+              </button>
               {MORE_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const active = pathname === item.href;
@@ -145,9 +165,9 @@ export function BottomNav() {
           md:hidden
           flex items-center
           h-[68px]
-          rounded-[24px]
-          border border-white/[0.08]
-          bg-[#111318]/90
+          rounded-[18px]
+          border border-white/[0.12]
+          bg-[#111212]/95
           px-2
           shadow-[0_12px_40px_rgba(0,0,0,0.35)]
           backdrop-blur-2xl
@@ -187,8 +207,8 @@ export function BottomNav() {
                     absolute
                     inset-x-1
                     inset-y-2
-                    rounded-[18px]
-                    bg-white/[0.07]
+                    rounded-[14px]
+                    bg-white/[0.11]
                   "
                   transition={{
                     type: "spring",

@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatTimeLabel } from "@/lib/dates";
@@ -7,34 +8,9 @@ import type { Task } from "@/types";
 
 export function NextUpList({ tasks }: { tasks: Task[] }) {
   return (
-    <Card>
-      <CardHeader>
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">Queue</p>
-        <CardTitle className="mt-2 text-xl tracking-[-0.03em]">Next Up</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {tasks.length === 0 ? (
-          <EmptyState title={copy.allCaughtUp} className="py-6" />
-        ) : (
-          <ul className="space-y-1">
-            {tasks.map((t) => (
-              <li
-                key={t.id}
-                className="flex items-center gap-3 rounded-[22px] border border-white/45 bg-white/46 px-3 py-3 text-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/6"
-              >
-                <div
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: `${t.color}16`, color: t.color }}
-                >
-                  <CategoryIcon iconName={t.icon} className="h-4 w-4" />
-                </div>
-                <span className="w-16 shrink-0 tabular-nums text-muted">{formatTimeLabel(t.startTime)}</span>
-                <span className="font-medium tracking-[-0.01em]">{t.title}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+    <section className="px-4 py-4" aria-label="Next tasks">
+      <div className="flex items-center justify-between gap-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">Queue</p><h2 className="mt-1 text-base font-semibold tracking-tight">Next up</h2></div><Link href="/schedule" aria-label="Open schedule" className="rounded-md p-1 text-muted transition-colors hover:text-foreground"><ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link></div>
+      {tasks.length === 0 ? <EmptyState title={copy.allCaughtUp} className="py-5" /> : <ul className="mt-3 divide-y divide-border">{tasks.map((task) => <li key={task.id} className="flex items-center gap-2.5 py-2.5 first:pt-0 last:pb-0"><div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${task.color}16`, color: task.color }}><CategoryIcon iconName={task.icon} className="h-3.5 w-3.5" /></div><span className="w-12 shrink-0 text-[11px] tabular-nums text-muted">{formatTimeLabel(task.startTime)}</span><span className="min-w-0 truncate text-sm font-medium">{task.title}</span></li>)}</ul>}
+    </section>
   );
 }

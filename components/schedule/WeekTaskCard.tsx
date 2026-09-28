@@ -38,12 +38,9 @@ export function WeekTaskCard({
   const isSkipped = task.status === "skipped";
   const isOverdue = placement === "overdue" && !isDone && !isSkipped;
   const isCurrent = placement === "current" && !isDone && !isSkipped;
-  const showCategoryTint = !isCurrent && !isOverdue;
-
   const dragStyle = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)`, zIndex: 30 } : undefined;
   const style = {
     ...dragStyle,
-    ...(showCategoryTint ? { backgroundColor: `${task.color}0d` } : undefined),
     ...(task.type === "FIXED" ? { borderLeftColor: task.color } : undefined),
   };
 
@@ -70,16 +67,15 @@ export function WeekTaskCard({
       exit="exit"
       whileHover={isDragging ? undefined : { y: -1 }}
       className={cn(
-        "group relative rounded-xl border p-2.5 text-xs transition-shadow hover:shadow-[var(--shadow-card)]",
-        isCurrent && "border-accent/50 bg-accent/[0.06] shadow-[var(--shadow-card)]",
-        isOverdue && "border-danger/40 bg-danger/[0.06]",
-        !isCurrent && !isOverdue && "border-border",
+        "group relative border-b border-border px-1 py-2 text-xs transition-colors last:border-b-0 hover:bg-surface-2/60 sm:px-1.5",
+        isCurrent && "border-l-2 border-l-success bg-accent/[0.045] pl-2",
+        isOverdue && "border-l-2 border-l-danger bg-danger/[0.035] pl-2",
         isDragging && "opacity-40",
         task.type === "FIXED" && "border-l-2",
         hasConflict && "ring-1 ring-danger/40"
       )}
     >
-      <div className="flex items-start gap-1.5">
+      <div className="flex items-center gap-1.5">
         <button
           type="button"
           {...attributes}
@@ -92,16 +88,16 @@ export function WeekTaskCard({
         <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded" style={{ color: task.color }} aria-hidden="true">
           <CategoryIcon iconName={task.icon} className="h-3.5 w-3.5" />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-baseline gap-2">
           <p className={cn("truncate font-medium", (isDone || isSkipped) && "text-muted line-through")}>{task.title}</p>
-          <p className="text-muted">{formatTimeLabel(task.startTime)}</p>
+          <p className="shrink-0 text-[11px] text-muted tabular-nums">{formatTimeLabel(task.startTime)}</p>
         </div>
         <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenu.Trigger asChild>
             <button
               type="button"
               aria-label="Task options"
-              className="flex h-6 w-6 items-center justify-center rounded-full text-muted opacity-0 hover:bg-surface-2 group-hover:opacity-100"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-muted opacity-70 hover:bg-surface-2 hover:text-foreground sm:h-6 sm:w-6 sm:opacity-0 sm:group-hover:opacity-100"
             >
               <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
             </button>

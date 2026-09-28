@@ -15,7 +15,7 @@ export function Timeline({ tasks, dayStatus }: { tasks: Task[]; dayStatus: DaySt
   }
 
   return (
-    <motion.ul layout className="space-y-1.5">
+    <motion.ul layout className="divide-y divide-border/80">
       <AnimatePresence initial={false}>
         {sorted.map((task) => {
           let placement: "current" | "overdue" | "completed" | "skipped" | "upcoming" = "upcoming";

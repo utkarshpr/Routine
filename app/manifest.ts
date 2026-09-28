@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Daily OS",
-    short_name: "Daily OS",
-    description: "Build your day. A calm, offline-first personal operating system for work, health, learning and life.",
+    name: "Routine",
+    short_name: "Routine",
+    description: "Make time count. A focused, offline-first personal operating system.",
     start_url: "/today",
     scope: "/",
     display: "standalone",

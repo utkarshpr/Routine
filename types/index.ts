@@ -80,6 +80,7 @@ export interface Task {
   order: number;
   createdAt: string;
   updatedAt: string;
+  reminder?: ReminderSettings;
 }
 
 export interface Habit {

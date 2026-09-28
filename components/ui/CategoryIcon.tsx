@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import {
   Blocks,
+  BookOpen,
   Braces,
   Briefcase,
   ChefHat,
@@ -23,6 +24,7 @@ const ICONS: Record<string, LucideIcon> = {
   Terminal,
   Network,
   Blocks,
+  BookOpen,
   Dumbbell,
   ChefHat,
   Sparkles,
@@ -43,12 +45,19 @@ export function CategoryIcon({
   iconName,
   className,
   style,
+  strokeWidth,
 }: {
   category?: Category;
   iconName?: string;
   className?: string;
   style?: React.CSSProperties;
+  strokeWidth?: number;
 }) {
   const resolvedName = iconName ?? (category ? CATEGORY_META[category].icon : "Circle");
-  return createElement(iconForName(resolvedName), { className, style, "aria-hidden": true });
+  return createElement(iconForName(resolvedName), {
+    className,
+    style,
+    strokeWidth: strokeWidth ?? 1.8,
+    "aria-hidden": true,
+  });
 }

@@ -10,6 +10,8 @@ export interface WeeklyStats {
   gymCompleted: number;
   gymTotal: number;
   routineCompletionPct: number;
+  missedCount: number;
+  plannedMinutes: number;
 }
 
 export function computeWeeklyStats(tasks: Task[], weekDates: Date[]): WeeklyStats {
@@ -22,6 +24,7 @@ export function computeWeeklyStats(tasks: Task[], weekDates: Date[]): WeeklyStat
 
   const gymTasks = weekTasks.filter((t) => t.category === "Gym");
   const requiring = weekTasks.filter((t) => t.completionRequired);
+  const plannedMinutes = weekTasks.reduce((sum, t) => sum + durationMinutes(t.startTime, t.endTime), 0);
 
   return {
     studyMinutes: minutesFor("DSA") + minutesFor("HLD") + minutesFor("LLD") + minutesFor("Golang"),
@@ -33,5 +36,7 @@ export function computeWeeklyStats(tasks: Task[], weekDates: Date[]): WeeklyStat
     gymTotal: gymTasks.length,
     routineCompletionPct:
       requiring.length === 0 ? 0 : Math.round((requiring.filter((t) => t.status === "completed").length / requiring.length) * 100),
+    missedCount: requiring.filter((t) => t.status === "pending").length,
+    plannedMinutes,
   };
 }

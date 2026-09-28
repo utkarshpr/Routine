@@ -1,184 +1,57 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import Link from "next/link";
+import { ArrowUpRight, CalendarDays, Flag, ListChecks, ScanLine, Settings, Sparkles, Target } from "lucide-react";
 import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Calendar,
-  Clock3,
-  Flag,
-  ListChecks,
-  Sparkles,
-  SunMedium,
-  Target,
-} from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { useNow } from "@/hooks/useNow";
 import { cardVariants, listStagger } from "@/lib/motion";
 
-const PRIMARY_ACTIONS = [
-  {
-    icon: SunMedium,
-    title: "Open today",
-    body: "See what needs your attention right now.",
-    href: "/today",
-  },
-  {
-    icon: Calendar,
-    title: "Plan the week",
-    body: "Adjust blocks, drag tasks, and shape the week ahead.",
-    href: "/schedule",
-  },
-  {
-    icon: Target,
-    title: "Start focus",
-    body: "Enter a clean timer and work on one thing at a time.",
-    href: "/focus",
-  },
+const DESTINATIONS = [
+  { label: "Plan the day", detail: "Schedule", href: "/today", icon: CalendarDays },
+  { label: "Protect a focus block", detail: "Deep work", href: "/focus", icon: Target },
+  { label: "Keep the rhythm", detail: "Habits", href: "/habits", icon: ListChecks },
 ];
 
-const SECONDARY_ACTIONS = [
-  {
-    icon: ListChecks,
-    title: "Habits",
-    body: "Track your daily consistency and streaks.",
-    href: "/habits",
-  },
-  {
-    icon: Flag,
-    title: "Goals",
-    body: "Keep longer-term milestones tied to daily work.",
-    href: "/goals",
-  },
-  {
-    icon: Sparkles,
-    title: "Weekly review",
-    body: "Reflect on progress and reset the next week.",
-    href: "/review",
-  },
+const EXPLORE = [
+  { label: "Schedule", href: "/schedule", icon: CalendarDays },
+  { label: "Goals", href: "/goals", icon: Flag },
+  { label: "Review", href: "/review", icon: Sparkles },
+  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 export default function HomePage() {
-  const router = useRouter();
-  const now = useNow(1000);
-  const dayLabel = format(now, "EEEE");
-  const dateLabel = format(now, "MMMM d, yyyy");
-  const timeLabel = format(now, "h:mm");
-  const meridiem = format(now, "a");
-
   return (
-    <motion.div
-      className="mx-auto max-w-[1360px] px-4 py-8 md:px-8 md:py-10"
-      initial="initial"
-      animate="animate"
-      variants={listStagger}
-    >
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_360px]">
-        <motion.section variants={cardVariants}>
-          <Card className="overflow-hidden p-7 md:p-9">
-            <div className="flex flex-col gap-8">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-[var(--shadow-card)]">
-                  <Sparkles className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold tracking-tight">Daily OS</p>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted">Calm planning for real work</p>
-                </div>
-              </div>
+    <motion.main className="mx-auto w-full max-w-[1180px] px-4 py-7 sm:px-6 md:px-10 md:py-12" initial="initial" animate="animate" variants={listStagger}>
+      <motion.header variants={cardVariants} className="max-w-3xl border-b border-border pb-7">
+        <div className="flex items-center gap-2 text-sm font-semibold tracking-[-0.04em]"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-foreground"><Sparkles className="h-4 w-4" aria-hidden="true" /></span>Routine <span className="ml-1 text-muted">/ workspace</span></div>
+        <h1 className="mt-8 text-4xl font-semibold leading-[0.95] tracking-[-0.065em] sm:text-6xl">Make space for what matters.</h1>
+        <p className="mt-4 max-w-xl text-sm leading-6 text-muted sm:text-base">A calm starting point for the work, rituals, and direction you want to keep close.</p>
+      </motion.header>
 
-              <div className="max-w-3xl">
-                <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted">Home</p>
-                <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] md:text-6xl">
-                  Build your day with
-                  <span className="block">clarity, not clutter.</span>
-                </h1>
-                <p className="mt-4 max-w-2xl text-base leading-8 text-muted md:text-lg">
-                  Keep your schedule, focus sessions, habits, and weekly review in one place. The work should stay central,
-                  and the interface should stay out of the way.
-                </p>
-              </div>
+      <motion.section variants={cardVariants} className="mt-5 overflow-hidden rounded-[20px] bg-accent text-accent-foreground md:mt-8" aria-label="Start today">
+        <Link href="/today" className="group flex items-center justify-between gap-5 px-5 py-5 sm:px-6 sm:py-6">
+          <span className="min-w-0"><span className="block text-[10px] font-semibold uppercase tracking-[0.18em] opacity-60">Start here</span><span className="mt-1 block text-xl font-semibold tracking-[-0.045em] sm:text-2xl">See what today needs.</span><span className="mt-1 block text-xs opacity-65">Your plan, next action, and progress in one quiet view.</span></span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 transition-transform group-hover:translate-x-1"><ArrowUpRight className="h-4 w-4" aria-hidden="true" /></span>
+        </Link>
+      </motion.section>
 
-              <div className="flex flex-wrap gap-3">
-                <Button size="lg" onClick={() => router.push("/today")} type="button">
-                  Go to today
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Button>
-                <Button variant="secondary" size="lg" onClick={() => router.push("/schedule")} type="button">
-                  Open schedule
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </motion.section>
-
-        <motion.aside variants={cardVariants}>
-          <Card className="h-full p-7 md:p-8">
-            <div className="flex h-full flex-col justify-between">
-              <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">Clock</p>
-                <p className="mt-3 text-5xl font-semibold tracking-[-0.06em] md:text-6xl">
-                  {timeLabel}
-                  <span className="ml-2 text-2xl text-muted md:text-3xl">{meridiem}</span>
-                </p>
-                <p className="mt-3 text-lg font-medium tracking-[-0.02em]">{dayLabel}</p>
-                <p className="mt-1 text-sm text-muted">{dateLabel}</p>
-              </div>
-
-              <div className="mt-10 rounded-[22px] border border-border bg-surface-2 p-4">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Clock3 className="h-4 w-4 text-muted" aria-hidden="true" />
-                  Ready when you are
-                </div>
-                <p className="mt-2 text-sm leading-7 text-muted">
-                  Start with planning, move into focus, and come back to review without bouncing across tools.
-                </p>
-              </div>
-            </div>
-          </Card>
-        </motion.aside>
-      </div>
-
-      <motion.section variants={cardVariants} className="mt-5">
-        <div className="grid gap-4 lg:grid-cols-3">
-          {PRIMARY_ACTIONS.map((action) => (
-            <Card
-              key={action.title}
-              className="cursor-pointer p-5 transition-transform hover:-translate-y-0.5"
-              onClick={() => router.push(action.href)}
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-surface-2 text-foreground">
-                <action.icon className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <p className="mt-5 text-xl font-semibold tracking-[-0.03em]">{action.title}</p>
-              <p className="mt-2 text-sm leading-7 text-muted">{action.body}</p>
-            </Card>
+      <motion.section variants={cardVariants} className="mt-8" aria-label="Workspace destinations">
+        <div className="flex items-center justify-between border-b border-border pb-3"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">For you</p><ScanLine className="h-4 w-4 text-muted" aria-hidden="true" /></div>
+        <div className="grid gap-3 pt-4 md:grid-cols-3">
+          {DESTINATIONS.map((item) => (
+            <Link key={item.href} href={item.href} className="group flex min-h-32 flex-col justify-between rounded-[18px] border border-border bg-surface p-4 transition-colors hover:border-border-strong hover:bg-surface-2">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface-2"><item.icon className="h-5 w-5 text-foreground" aria-hidden="true" /></span>
+              <span className="mt-6 flex items-end justify-between gap-3"><span><span className="block text-base font-semibold tracking-[-0.03em]">{item.label}</span><span className="mt-1 block text-xs text-muted">{item.detail}</span></span><ArrowUpRight className="mb-0.5 h-4 w-4 text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" aria-hidden="true" /></span>
+            </Link>
           ))}
         </div>
       </motion.section>
 
-      <motion.section variants={cardVariants} className="mt-5">
-        <div className="grid gap-4 md:grid-cols-3">
-          {SECONDARY_ACTIONS.map((action) => (
-            <Card
-              key={action.title}
-              className="cursor-pointer p-5 transition-transform hover:-translate-y-0.5"
-              onClick={() => router.push(action.href)}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-surface-2 text-foreground">
-                  <action.icon className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <ArrowRight className="mt-1 h-4 w-4 text-muted" aria-hidden="true" />
-              </div>
-              <p className="mt-5 text-lg font-semibold tracking-[-0.03em]">{action.title}</p>
-              <p className="mt-2 text-sm leading-7 text-muted">{action.body}</p>
-            </Card>
-          ))}
+      <motion.section variants={cardVariants} className="mt-10" aria-label="Explore Routine">
+        <div className="flex items-center justify-between border-b border-border pb-3"><p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Explore Routine</p><span className="text-xs text-muted">{EXPLORE.length} spaces</span></div>
+        <div className="flex flex-wrap gap-2.5 pt-4">
+          {EXPLORE.map((item) => <Link key={item.href} href={item.href} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:border-border-strong hover:bg-surface-2"><item.icon className="h-4 w-4 text-muted" aria-hidden="true" />{item.label}</Link>)}
         </div>
       </motion.section>
-    </motion.div>
+    </motion.main>
   );
 }

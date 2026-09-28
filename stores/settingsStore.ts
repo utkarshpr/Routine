@@ -6,7 +6,7 @@ export const DEFAULT_SETTINGS: Settings = {
   id: "settings",
   userName: "",
   hasOnboarded: false,
-  appearance: "system",
+  appearance: "light",
   accentColor: "#2563eb",
   startOfDay: "06:00",
   defaultWorkStart: "10:00",

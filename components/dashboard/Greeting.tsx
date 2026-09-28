@@ -12,18 +12,9 @@ export function Greeting() {
   const greetingLine = userName ? `${greetingForNow(now)}, ${userName}` : greetingForNow(now);
 
   return (
-    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-      <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.24em] text-muted">
-        <motion.span
-          className="h-1.5 w-1.5 rounded-full bg-foreground/70"
-          animate={{ opacity: [1, 0.4, 1] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        />
-        {greetingLine}
-      </p>
-      <h1 className="mt-3 text-4xl font-semibold tracking-[-0.06em] text-foreground md:text-6xl md:leading-[0.94]">
-        {format(now, "EEEE, MMMM d")}
-      </h1>
+    <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <p className="flex items-center gap-2 text-xs font-medium text-muted"><span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />{greetingLine}</p>
+      <h1 className="mt-1 text-2xl font-semibold tracking-[-0.05em] text-foreground sm:text-3xl">{format(now, "EEEE, MMMM d")}</h1>
     </motion.div>
   );
 }

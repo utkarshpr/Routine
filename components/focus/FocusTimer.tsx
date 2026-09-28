@@ -47,18 +47,18 @@ export function FocusTimer({
   const meta = CATEGORY_META[session.category];
   const displaySeconds = isBreakOrTimed ? Math.max(0, remaining) : elapsed;
   const progressValue = Math.max(0, Math.min(1, progressPct / 100));
-  const ringSize = 280;
-  const strokeWidth = 12;
+  const ringSize = 240;
+  const strokeWidth = 10;
   const radius = (ringSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - progressValue * circumference;
   const minutesRemaining = Math.max(0, Math.ceil(displaySeconds / 60));
 
   return (
-    <div className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-6 py-12">
+    <div className="relative flex min-h-[calc(100vh-5rem)] items-center justify-center overflow-hidden px-3 py-5 sm:px-6 sm:py-10">
       <BackgroundGlow />
 
-      <Card className="relative z-10 w-full max-w-[560px] overflow-hidden p-8 text-center md:p-10">
+      <Card className="relative z-10 w-full max-w-[560px] overflow-hidden bg-[#111212] p-5 text-center sm:p-8 md:p-10">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-32 opacity-70"
@@ -76,7 +76,7 @@ export function FocusTimer({
                 <CategoryIcon category={session.category} className="h-4 w-4" style={{ color: meta.color }} />
                 {session.category}
               </div>
-              <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] md:text-5xl">{session.title}</h1>
+              <h1 className="mt-3 text-2xl font-semibold tracking-[-0.055em] sm:text-4xl">{session.title}</h1>
               <p className="mt-2 text-sm text-muted">
                 {isRunning ? "Stay with this one thing." : "Paused. Resume when you're ready."}
               </p>
@@ -88,7 +88,7 @@ export function FocusTimer({
             </div>
           </div>
 
-          <div className="relative mt-10 flex items-center justify-center">
+          <div className="relative mt-7 flex items-center justify-center sm:mt-10">
             <div className="relative">
               <svg width={ringSize} height={ringSize} className="-rotate-90">
                 <circle
@@ -134,7 +134,7 @@ export function FocusTimer({
                 initial={{ opacity: 0.82 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
-                className="text-6xl font-semibold tabular-nums tracking-[-0.06em] md:text-7xl"
+                className="cred-display text-6xl tabular-nums md:text-7xl"
               >
                 {formatClock(displaySeconds)}
               </motion.p>
